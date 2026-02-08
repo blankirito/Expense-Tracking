@@ -1,0 +1,92 @@
+<resources>
+    <string name="app_name">ExpenseTrackingApplication</string>
+
+    // Login page
+    <string name="welcome_back">Welcome Back</string>
+    <string name="sign_in_to_your_expense_tracking_account">Sign in to your expense tracking account</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="youexamplecom">you@example.com</string>
+    <string name="passwordInput">......</string>
+    <string name="signIn">Sign in</string>
+    <string name="no_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign up</string>
+
+    // Register page
+    <string name="create_an_account">Create an account</string>
+    <string name="introduction">Start tracking your expenses today</string>
+    <string name="fullname">Full name</string>
+    <string name="example_name">John Doe</string>
+    <string name="enter_your_email">Enter your email</string>
+    <string name="enter_your_password">Password</string>
+    <string name="confirmPassword">Confirm Password</string>
+    <string name="confirm_password_again">......</string>
+    <string name="create_account">Create Account</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_in">Sign in</string>
+
+    // Homepage
+    <string name="homepage_intro">Here\'s your financial overview</string>
+    <string name="totalBalance">Total Balance</string>
+    <string name="thisMonth">This Month</string>
+    <string name="monthlyTrend">Monthly Trends</string>
+    <string name="expenseSummary">Expense Summary</string>
+    <string name="spendingPrediction">Spending Predictions</string>
+    <string name="recentTransaction">Recent Transactions</string>
+
+    // Add Page
+    <string name="add_expense">Add Expense</string>
+    <string name="add_expense_intro">Enter expense details manually</string>
+    <string name="expense_detail">Expense Details</string>
+    <string name="amount">Amount</string>
+    <string name="example_amount">$0.00</string>
+    <string name="category">Category</string>
+    <string name="example_category">Select a category</string>
+    <string name="date">Date</string>
+    <string name="example_date">31/01/2026</string>
+    <string name="description">Description (Optional)</string>
+    <string name="example_description">e.g. Lunch at restaurant</string>
+    <string name="save_expense">Save Expense</string>
+    <string name="tip">Tips:You can also scan receipts using the Scan tab for automatic entry!</string>
+
+    // Scan page
+    <string name="scan_receipt">Scan Receipt</string>
+    <string name="scan_receipt_intro">Automatic expense extraction</string>
+    <string name="capture_receipt">Capture Receipt</string>
+    <string name="upload_from_gallery">Upload from Gallery</string>
+    <string name="scan_tip_1">How it works</string>
+    <string name="scan_tip_2">1. Point your camera at the receipt or upload an image</string>
+    <string name="scan_tip_3">2. Our OCR technology extracts the data automatically</string>
+    <string name="scan_tip_4">3. Review and confirms the extracted information</string>
+    <string name="scan_tip_5">4. The expense is saved to your account</string>
+
+    // Budget page
+    <string name="budget_tracker">Budget Tracker</string>
+    <string name="budget_tracker_intro">Manage your monthly spending limits</string>
+    <string name="monthly_budget">Total Monthly Budget</string>
+    <string name="add_new_category">Add New Category</string>
+    <string name="budget_tips">set realistic budgets based on your spending patterns. Review and adjust monthly for best results.</string>
+
+    // Profile page
+    <string name="profile">Profile</string>
+    <string name="profile_intro">Manage your account settings</string>
+    <string name="edit_profile">Edit Profile</string>
+    <string name="account_detail">Account Details</string>
+    <string name="phone_num">Phone Number</string>
+    <string name="example_phone_num">+1(555)123-4567</string>"
+    <string name="wallet_detail">Wallet</string>
+    <string name="cash">Cash</string>
+    <string name="bank">Bank</string>
+    <string name="ewallet">E Wallet</string>
+    <string name="currency">Currency</string>
+    <string name="edit_budget">Edit Budget</string>
+    <string name="security">Security</string>
+    <string name="change_password">Change password</string>
+    <string name="manage_payment_methods">Manage Payment Methods</string>
+    <string name="preferences">Preferences</string>
+    <string name="push_notification">Push Notification</string>
+    <string name="push_notigication_intro">Receive alerts about expenses</string>
+    <string name="language">Language</string>
+    <string name="change_language">Change</string>
+    <string name="logout">Log Out</string>
+</resources>
