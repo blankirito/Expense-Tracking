@@ -38,28 +38,32 @@ import com.example.expense_tracking.R
 import com.example.expense_tracking.ui.components.EditEmailField
 import com.example.expense_tracking.ui.components.EditNameField
 import com.example.expense_tracking.ui.components.EditPasswordField
+import com.example.expense_tracking.viewmodel.RegisterViewModel
 
 @Composable
 fun RegisterPage(
-    viewModel: ExpenseTrackingViewModel = ExpenseTrackingViewModel(),
+    viewModel: RegisterViewModel = RegisterViewModel(),
     onRegisterSuccess: () -> Unit,
     onLoginClick: () -> Unit
 ) {
     RegisterCard(
         create_an_account = stringResource(R.string.create_an_account),
         introduction = stringResource(R.string.introduction),
-        fullname = viewModel.register_fullname,
-        onFullnameChange = { viewModel.register_fullname = it },
-        email = viewModel.register_email,
-        onEmailChange = { viewModel.register_email = it },
-        password = viewModel.register_password,
-        onPasswordChange = { viewModel.register_password = it },
-        confirmPassword = viewModel.confirm_password,
-        onConfirmPasswordChange = { viewModel.confirm_password = it },
-        //registerError = viewModel.registerError,
+        fullname = viewModel.registerFullname,
+        onFullnameChange = { viewModel.registerFullname = it },
+        email = viewModel.registerEmail,
+        onEmailChange = { viewModel.registerEmail = it },
+        password = viewModel.registerPassword,
+        onPasswordChange = { viewModel.registerPassword = it },
+        confirmPassword = viewModel.confirmPassword,
+        onConfirmPasswordChange = { viewModel.confirmPassword = it },
+        registerError = viewModel.registerError,
         onRegisterClick = {
-            viewModel.register()
-            if (viewModel.registerSucess) onRegisterSuccess()
+            viewModel.register { success ->
+                if (success) {
+                    onRegisterSuccess()
+                }
+            }
         },
         onLoginClick = onLoginClick
     )
@@ -77,7 +81,7 @@ fun RegisterCard(
     onPasswordChange: (String) -> Unit,
     confirmPassword: String,
     onConfirmPasswordChange: (String) -> Unit,
-    //registerError: String?,
+    registerError: String?,
     onRegisterClick: () -> Unit,
     onLoginClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -205,7 +209,7 @@ fun RegisterCard(
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )
-            /* registerError?.let { error ->
+            registerError?.let { error ->
                  Text(
                      text = error,
                      color = Color.Red,
@@ -218,7 +222,7 @@ fun RegisterCard(
              Spacer(
                  modifier = Modifier.padding(8.dp)
 
-             )*/
+             )
             Row(
                 modifier = modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,

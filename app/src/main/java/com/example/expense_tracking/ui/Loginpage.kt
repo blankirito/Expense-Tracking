@@ -41,28 +41,26 @@ import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
 import com.example.expense_tracking.ui.components.EditEmailField
 import com.example.expense_tracking.ui.components.EditPasswordField
-import com.example.expense_tracking.ui.ExpenseTrackingViewModel
+import com.example.expense_tracking.viewmodel.LoginViewModel
 
 @Composable
 fun LoginPage(
-    viewModel: ExpenseTrackingViewModel = ExpenseTrackingViewModel(),
+    viewModel: LoginViewModel = LoginViewModel(),
     onLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
 ) {
     LoginCard(
         welcome_back = stringResource(R.string.welcome_back),
         sign_in_to_your_expense_tracking_account = stringResource(R.string.sign_in_to_your_expense_tracking_account),
-        emailInput = viewModel.login_email,
-        onEmailChange = { viewModel.login_email = it },
-        passwordInput = viewModel.login_password,
-        onPasswordChange = { viewModel.login_password = it },
-        /*loginError = viewModel.loginError,
-        onLoginClick = { viewModel.login { success ->
-            if (success) onLoginSuccess()
-        }*/
+        emailInput = viewModel.loginEmail,
+        onEmailChange = { viewModel.loginEmail = it },
+        passwordInput = viewModel.loginPassword,
+        onPasswordChange = { viewModel.loginPassword = it },
+        loginError = viewModel.loginError,
         onLoginClick = {
-            viewModel.login()
-            if (viewModel.loginSucess) onLoginSuccess()
+            viewModel.login { success ->
+                if (success) onLoginSuccess()
+            }
         },
         onRegisterClick = onRegisterClick
     )
@@ -76,7 +74,7 @@ fun LoginCard(
     onEmailChange: (String) -> Unit,
     passwordInput: String,
     onPasswordChange: (String) -> Unit,
-    //loginError: String?,
+    loginError: String?,
     onLoginClick: () -> Unit,
     onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -170,7 +168,7 @@ fun LoginCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                /*loginError?.let { error ->
+                loginError?.let { error ->
                     Text(
                         text = error,
                         color = Color.Red,
@@ -182,7 +180,7 @@ fun LoginCard(
                 }
 
 
-                Spacer(modifier = Modifier.height(16.dp))*/
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),

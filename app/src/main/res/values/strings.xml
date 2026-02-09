@@ -48,6 +48,7 @@
     <string name="example_description">e.g. Lunch at restaurant</string>
     <string name="save_expense">Save Expense</string>
     <string name="tip">Tips:You can also scan receipts using the Scan tab for automatic entry!</string>
+    <string name="example_currency">$</string>
 
     // Scan page
     <string name="scan_receipt">Scan Receipt</string>
@@ -82,7 +83,7 @@
     <string name="edit_budget">Edit Budget</string>
     <string name="security">Security</string>
     <string name="change_password">Change password</string>
-    <string name="manage_payment_methods">Manage Payment Methods</string>
+    <string name="change_email">Change email</string>
     <string name="preferences">Preferences</string>
     <string name="push_notification">Push Notification</string>
     <string name="push_notigication_intro">Receive alerts about expenses</string>

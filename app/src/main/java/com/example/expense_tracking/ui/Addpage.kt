@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
+import com.example.expense_tracking.ui.components.EditCurrencyfield
 import com.example.expense_tracking.ui.components.Editamountfield
 import com.example.expense_tracking.ui.components.Editcategoryfield
 import com.example.expense_tracking.ui.components.Editdatefield
@@ -26,6 +27,7 @@ fun AddPage(modifier: Modifier = Modifier) {
 
     val backgroundColor = Color(0xFFE6F0FA)
 
+    var currency by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
@@ -116,6 +118,8 @@ fun AddPage(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Addpage_ExpenseDetail(
+                currency = currency,
+                onCurrencyChange = { currency = it },
                 amount = amount,
                 onAmountChange = { amount = it },
                 category = category,
@@ -137,6 +141,8 @@ fun AddPage(modifier: Modifier = Modifier) {
 
 @Composable
 fun Addpage_ExpenseDetail(
+    currency: String,
+    onCurrencyChange: (String) -> Unit,
     amount: String,
     onAmountChange: (String) -> Unit,
     category: String,
@@ -163,8 +169,20 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.height(8.dp)
             )
             Text(
+                text = stringResource(R.string.currency)
+            )
+            EditCurrencyfield(
+                value = currency,
+                onValueChange = onCurrencyChange,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+            Text(
                 text = stringResource(R.string.amount)
             )
+            // dropdown menu for account (cash, wallet, bank)
             Editamountfield(
                 value = amount,
                 onValueChange = onAmountChange,

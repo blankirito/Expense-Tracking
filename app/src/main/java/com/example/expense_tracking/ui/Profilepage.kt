@@ -48,7 +48,7 @@ import com.example.expense_tracking.R
 @Composable
 fun ProfilePage(
     modifier: Modifier = Modifier,
-    viewModel: ExpenseTrackingViewModel = ExpenseTrackingViewModel(),
+    //viewModel: ExpenseTrackingViewModel = ExpenseTrackingViewModel(),
 ) {
 
     var selectedTab by remember { mutableStateOf("Profile") }
@@ -153,7 +153,7 @@ fun ProfilePage(
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
-                onClick = { viewModel.logout() },
+                onClick = { /*viewModel.logout()*/ },
                 modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x80FFFFFF )
@@ -322,6 +322,30 @@ fun Profilepage_WalletDetail(
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
+            Text(text = stringResource(R.string.currency))
+            Spacer(
+                modifier = Modifier.padding(4.dp)
+
+            )
+            Card(
+                modifier
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF4CAF50)
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = currency
+                    )
+                }
+            }
             Text(text = stringResource(R.string.cash))
             Spacer(
                 modifier = Modifier.padding(4.dp)
@@ -342,10 +366,6 @@ fun Profilepage_WalletDetail(
                 )  {
                     Text(
                         text = cash
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = currency
                     )
                 }
             }
@@ -373,10 +393,6 @@ fun Profilepage_WalletDetail(
                     Text(
                         text = bank
                     )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = currency
-                    )
                 }
             }
             Spacer(
@@ -403,10 +419,6 @@ fun Profilepage_WalletDetail(
                     Text(
                         text = ewallet
                     )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = currency
-                    )
                 }
             }
             Spacer(
@@ -428,23 +440,6 @@ fun Profilepage_WalletDetail(
             }
         }
     }
-}
-
-
-@Composable
-fun EditPhoneField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    TextField(
-        value = value,
-        singleLine = true,
-        modifier = Modifier,
-        onValueChange = onValueChange ,
-        label = { Text(stringResource(R.string.example_phone_num)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
 }
 
 @Composable
@@ -493,7 +488,7 @@ fun Profilepage_Security(
                 ),
                 border = BorderStroke(0.5.dp, Color.Gray)
             ) {
-                Text(text = stringResource(R.string.manage_payment_methods))
+                Text(text = stringResource(R.string.change_email))
             }
         }
     }

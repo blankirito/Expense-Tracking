@@ -9,12 +9,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import com.example.expense_tracking.ui.*
 import com.example.expense_tracking.R
-import com.example.expense_tracking.ui.ExpenseTrackingViewModel
-
-enum class AppScreen {
-    AUTHENTICATION,
-    MAIN
-}
+import com.example.expense_tracking.viewmodel.LoginViewModel
+import com.example.expense_tracking.viewmodel.RegisterViewModel
 
 enum class ExpenseTrackingScreen {
     Home,
@@ -27,36 +23,40 @@ enum class ExpenseTrackingScreen {
 @Composable
 fun ExpenseTrackingApplication() {
     AppRoot(
-        viewModel = ExpenseTrackingViewModel()
+        loginViewModel = LoginViewModel(),
+        registerViewModel = RegisterViewModel()
     )
 }
 
 @Composable
-fun AppRoot(viewModel: ExpenseTrackingViewModel) {
+fun AppRoot(
+    loginViewModel: LoginViewModel,
+    registerViewModel: RegisterViewModel
+    ) {
     var showLogin by remember { mutableStateOf(true) }
 
-    if (!viewModel.isLoggedIn) {
+    if (!loginViewModel.isLoggedIn) {
         if (showLogin) {
             LoginPage(
-                viewModel = viewModel,
-                onLoginSuccess = { viewModel.isLoggedIn = true },
+                viewModel = loginViewModel,
+                onLoginSuccess = { loginViewModel.isLoggedIn = true },
                 onRegisterClick = { showLogin = false }
             )
         } else {
             RegisterPage(
-                viewModel = viewModel,
-                onRegisterSuccess = { viewModel.isLoggedIn = true },
+                viewModel = registerViewModel,
+                onRegisterSuccess = { loginViewModel.isLoggedIn = true },
                 onLoginClick = { showLogin = true }
             )
         }
     } else {
-        MainScaffold(viewModel)
+        MainScaffold()
     }
 }
 
 
 @Composable
-fun MainScaffold(viewModel: ExpenseTrackingViewModel) {
+fun MainScaffold() {
     var currentScreen by remember { mutableStateOf(ExpenseTrackingScreen.Home) }
 
     val navItems = listOf(
@@ -103,7 +103,7 @@ fun MainScaffold(viewModel: ExpenseTrackingViewModel) {
             ExpenseTrackingScreen.Add -> AddPage(modifier)
             ExpenseTrackingScreen.Scan -> ScanPage(modifier)
             ExpenseTrackingScreen.Budget -> BudgetPage(modifier)
-            ExpenseTrackingScreen.Profile -> ProfilePage(viewModel = viewModel)
+            ExpenseTrackingScreen.Profile -> ProfilePage(modifier)
         }
     }
 }
