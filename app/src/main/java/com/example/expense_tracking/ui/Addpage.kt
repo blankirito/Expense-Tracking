@@ -27,6 +27,7 @@ import com.example.expense_tracking.ui.components.Editdatefield
 import com.example.expense_tracking.ui.components.Editdescriptionfield
 import com.example.expense_tracking.ui.components.*
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AddPage(
@@ -237,7 +238,8 @@ fun Addpage_ExpenseDetail(
             )
             Button(
                 onClick = {
-                    viewModel.saveExpense(userId = "user_001") {
+                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
+                    viewModel.saveExpense(userId = currentUserId) {
                         Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
                     }
                 },

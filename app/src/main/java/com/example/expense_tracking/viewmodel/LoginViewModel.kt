@@ -5,25 +5,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.expense_tracking.data.Repository.LoginRepository
+import com.google.firebase.auth.FirebaseAuth
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel {
     private val repository = LoginRepository()
 
     var isLoggedIn by mutableStateOf(false)
 
     var loginEmail by mutableStateOf("")
     var loginPassword by mutableStateOf("")
-    var loginSuccess by mutableStateOf(false)
-    var loginError by mutableStateOf("")
+    var loginError by mutableStateOf<String?>(null)
 
-    fun login(onComplete: (Boolean) -> Unit) {
-        repository.login_email = loginEmail
-        repository.login_password = loginPassword
 
-        repository.login { success ->
-            loginSuccess = repository.loginSuccess
-            loginError = repository.loginError
-            onComplete(success)
-        }
+    fun loginWithEmail(onComplete: (Boolean) -> Unit) {
+        FirebaseAuth.getInstance()
+            .signInWithEmailAndPassword(loginEmail, loginPassword)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    isLoggedIn = true
+                    loginError = null
+                    onComplete(true)
+                } else {
+                    loginError = task.exception?.message ?: "Login failed"
+                    isLoggedIn = false
+                    onComplete(false)
+                }
+            }
     }
 }

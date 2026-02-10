@@ -29,7 +29,7 @@ class RegisterViewModel {
             return
         }
 
-        repo.registerUser(name = registerFullname, email = registerEmail, password = registerPassword, "") { success, errorMsg ->
+        repo.registerUser(name = registerFullname, email = registerEmail, password = registerPassword, phone = "") { success, errorMsg ->
             if (success) {
                 registerError = ""
                 registerSuccess = true

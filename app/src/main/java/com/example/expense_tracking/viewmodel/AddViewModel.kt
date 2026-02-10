@@ -65,7 +65,13 @@ class AddExpenseViewModel(
                 val account = repository.getAccount(selectedAccountId)
                 val newBalance = account.current_balance - expenseAmount
                 val expense = repository.createExpense(
-                    userId, selectedAccountId, category, expenseAmount, date, description, account.name
+                    userId = userId,
+                    accountId = selectedAccountId,
+                    category = category,
+                    price = expenseAmount,
+                    date = date,
+                    description = description,
+                    paymentMethod = account.type
                 )
                 repository.addExpenseDetail(expense)
                 repository.updateAccountBalance(selectedAccountId, newBalance)

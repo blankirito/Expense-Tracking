@@ -11,6 +11,7 @@ import com.example.expense_tracking.ui.*
 import com.example.expense_tracking.R
 import com.example.expense_tracking.viewmodel.LoginViewModel
 import com.example.expense_tracking.viewmodel.RegisterViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 enum class ExpenseTrackingScreen {
     Home,
@@ -35,6 +36,14 @@ fun AppRoot(
     ) {
     var showLogin by remember { mutableStateOf(true) }
 
+    var currentUserId by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.uid) }
+
+    LaunchedEffect(loginViewModel.isLoggedIn) {
+        if (loginViewModel.isLoggedIn) {
+            currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        }
+    }
+
     if (!loginViewModel.isLoggedIn) {
         if (showLogin) {
             LoginPage(
@@ -50,13 +59,13 @@ fun AppRoot(
             )
         }
     } else {
-        MainScaffold()
+        MainScaffold(currentUserId)
     }
 }
 
 
 @Composable
-fun MainScaffold() {
+fun MainScaffold(currentUserId: String?) {
     var currentScreen by remember { mutableStateOf(ExpenseTrackingScreen.Home) }
 
     val navItems = listOf(
@@ -66,6 +75,8 @@ fun MainScaffold() {
         Triple(ExpenseTrackingScreen.Budget, R.drawable.account_balance_wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24, "Budget"),
         Triple(ExpenseTrackingScreen.Profile, R.drawable.person_24dp_e3e3e3_fill0_wght400_grad0_opsz24, "Profile")
     )
+
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
 
     Scaffold(
         bottomBar = {
@@ -99,7 +110,13 @@ fun MainScaffold() {
         val modifier = Modifier.padding(innerPadding)
 
         when (currentScreen) {
-            ExpenseTrackingScreen.Home -> HomePage(modifier)
+            ExpenseTrackingScreen.Home -> {
+                if (currentUserId != null) {
+                    HomePage(userId = currentUserId)
+                } else {
+                    Text("Loading user info...")
+                }
+            }
             ExpenseTrackingScreen.Add -> AddPage(modifier)
             ExpenseTrackingScreen.Scan -> ScanPage(modifier)
             ExpenseTrackingScreen.Budget -> BudgetPage(modifier)

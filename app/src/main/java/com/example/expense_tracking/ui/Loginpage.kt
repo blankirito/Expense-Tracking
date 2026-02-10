@@ -58,8 +58,10 @@ fun LoginPage(
         onPasswordChange = { viewModel.loginPassword = it },
         loginError = viewModel.loginError,
         onLoginClick = {
-            viewModel.login { success ->
-                if (success) onLoginSuccess()
+            viewModel.loginWithEmail { success ->
+                if (success) {
+                    onLoginSuccess()
+                }
             }
         },
         onRegisterClick = onRegisterClick

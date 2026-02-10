@@ -2,7 +2,9 @@ package com.example.expense_tracking.ui
 
 import androidx.annotation.ColorRes
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -26,6 +29,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,10 +46,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.expense_tracking.R
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
+import com.example.expense_tracking.data.model.Expense
+import com.example.expense_tracking.viewmodel.HomeViewModel
 
 
 @Composable
-fun HomePage(modifier: Modifier = Modifier) {
+fun HomePage(
+    modifier: Modifier = Modifier,
+    userId: String,
+    viewModel: HomeViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+) {
+    LaunchedEffect(userId) {
+        viewModel.loadUserData(userId)
+    }
+    val accounts by viewModel.accounts.collectAsState()
+    val totalBalance by viewModel.totalBalance.collectAsState()
+    val thisMonthExpenses by viewModel.thisMonthExpenses.collectAsState()
+    val recentExpenses by viewModel.recentExpenses.collectAsState()
 
     var selectedTab by remember { mutableStateOf("Home") }
 
@@ -142,6 +160,7 @@ fun HomePage(modifier: Modifier = Modifier) {
         }
     ) { innerPadding ->
 
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -171,11 +190,13 @@ fun HomePage(modifier: Modifier = Modifier) {
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Homepage_totalBalance(
+                    amount = totalBalance.toInt(),
                     modifier = Modifier
                         .weight(1f)
                         .height(85.dp)
                 )
                 Homepage_thisMonth(
+                    amount = thisMonthExpenses.toInt(),
                     modifier = Modifier
                         .weight(1f)
                         .height(85.dp)
@@ -212,6 +233,7 @@ fun HomePage(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Homepage_RecentTransactions(
+                recentExpenses = recentExpenses,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -329,7 +351,10 @@ fun Homepage_SpendingPredictions(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Homepage_RecentTransactions(modifier: Modifier = Modifier) {
+fun Homepage_RecentTransactions(
+    recentExpenses: List<Expense>,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -346,34 +371,14 @@ fun Homepage_RecentTransactions(modifier: Modifier = Modifier) {
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )
-            Homepage_RecentTransaction_Record(
-                modifier = Modifier.fillMaxWidth(),
-                currency = "$",
-                total_cost = 55.00,
-                date = "2025-11-17",
-                description = "KFC"
-            )
-            Homepage_RecentTransaction_Record(
-                modifier = Modifier.fillMaxWidth(),
-                currency = "$",
-                total_cost = 12.00,
-                date = "2025-11-17",
-                description = "7-11"
-            )
-            Homepage_RecentTransaction_Record(
-                modifier = Modifier.fillMaxWidth(),
-                currency = "$",
-                total_cost = 56.00,
-                date = "2025-11-17",
-                description = "McDonald's"
-            )
-            Homepage_RecentTransaction_Record(
-                modifier = Modifier.fillMaxWidth(),
-                currency = "$",
-                total_cost = 12.50,
-                date = "2025-11-18",
-                description = "Starbucks"
-            )
+            recentExpenses.forEach { expense ->
+                Homepage_RecentTransaction_Record(
+                    currency = "MYR",
+                    total_cost = expense.price ?: 0.0,
+                    date = expense.date ?: "N/A",
+                    description = expense.description ?: "N/A"
+                )
+            }
         }
     }
 }
@@ -427,6 +432,6 @@ fun Homepage_RecentTransaction_Record(
 @Composable
 fun HomePreview() {
     ExpenseTrackingApplicationTheme {
-        HomePage()
+        HomePage(userId = "preview_user")
     }
 }
