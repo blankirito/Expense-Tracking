@@ -60,5 +60,16 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:33.6.0"))
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
+    implementation ("androidx.compose.ui:ui:1.6.0")
+    implementation ("androidx.compose.material3:material3:1.2.0-alpha03")
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
+
+    // ViewModel
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // Compose 与 ViewModel 集成
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 }

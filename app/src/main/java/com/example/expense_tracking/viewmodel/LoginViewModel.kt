@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.example.expense_tracking.data.LoginRepository
+import com.example.expense_tracking.data.Repository.LoginRepository
 
 class LoginViewModel : ViewModel() {
     private val repository = LoginRepository()

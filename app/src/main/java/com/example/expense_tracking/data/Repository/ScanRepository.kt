@@ -1,4 +1,4 @@
-package com.example.expense_tracking.data
+package com.example.expense_tracking.data.Repository
 
 import android.net.Uri
 

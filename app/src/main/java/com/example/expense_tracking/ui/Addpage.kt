@@ -1,28 +1,38 @@
 package com.example.expense_tracking.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
+import com.example.expense_tracking.data.model.*
 import com.example.expense_tracking.ui.components.EditCurrencyfield
 import com.example.expense_tracking.ui.components.Editamountfield
 import com.example.expense_tracking.ui.components.Editcategoryfield
 import com.example.expense_tracking.ui.components.Editdatefield
 import com.example.expense_tracking.ui.components.Editdescriptionfield
+import com.example.expense_tracking.ui.components.*
+import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 
 @Composable
-fun AddPage(modifier: Modifier = Modifier) {
-
+fun AddPage(
+    modifier: Modifier = Modifier,
+    viewModel: AddExpenseViewModel = viewModel()
+) {
     var selectedTab by remember { mutableStateOf("Add") }
 
     val backgroundColor = Color(0xFFE6F0FA)
@@ -107,6 +117,7 @@ fun AddPage(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Top
         ) {
@@ -118,41 +129,25 @@ fun AddPage(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(12.dp))
 
             Addpage_ExpenseDetail(
-                currency = currency,
-                onCurrencyChange = { currency = it },
-                amount = amount,
-                onAmountChange = { amount = it },
-                category = category,
-                onCategoryChange = { category = it },
-                date = date,
-                onDateChange = { date = it },
-                description = description,
-                onDescriptionChange = { description = it }
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Addpage_tip(modifier = Modifier.fillMaxWidth())
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }
 
 @Composable
 fun Addpage_ExpenseDetail(
-    currency: String,
-    onCurrencyChange: (String) -> Unit,
-    amount: String,
-    onAmountChange: (String) -> Unit,
-    category: String,
-    onCategoryChange: (String) -> Unit,
-    date: String,
-    onDateChange: (String) -> Unit,
-    description: String,
-    onDescriptionChange: (String) -> Unit,
+    viewModel: AddExpenseViewModel,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -172,20 +167,36 @@ fun Addpage_ExpenseDetail(
                 text = stringResource(R.string.currency)
             )
             EditCurrencyfield(
-                value = currency,
-                onValueChange = onCurrencyChange,
+                value = viewModel.currency,
+                onValueChange = { viewModel.onCurrencyChange(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
                 modifier = Modifier.height(8.dp)
             )
             Text(
+                text = stringResource(R.string.wallet)
+            )
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+            WalletDropDown(
+                modifier = Modifier.fillMaxWidth(),
+                selectedOption = viewModel.selectedAccountId,
+                onSelected = {
+                    viewModel.onAccountSelected(it)
+                }
+            )
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+            Text(
                 text = stringResource(R.string.amount)
             )
-            // dropdown menu for account (cash, wallet, bank)
             Editamountfield(
-                value = amount,
-                onValueChange = onAmountChange,
+                value = viewModel.amount,
+                onValueChange = { viewModel.onAmountChange(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
@@ -195,8 +206,8 @@ fun Addpage_ExpenseDetail(
                 text = stringResource(R.string.category)
             )
             Editcategoryfield(
-                value = category,
-                onValueChange = onCategoryChange,
+                value = viewModel.category,
+                onValueChange = { viewModel.onCategoryChange(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
@@ -206,8 +217,8 @@ fun Addpage_ExpenseDetail(
                 text = stringResource(R.string.date)
             )
             Editdatefield(
-                value = date,
-                onValueChange = onDateChange,
+                value = viewModel.date,
+                onValueChange = { viewModel.onDateChange(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
@@ -217,15 +228,19 @@ fun Addpage_ExpenseDetail(
                 text = stringResource(R.string.description)
             )
             Editdescriptionfield(
-                value = description,
-                onValueChange = onDescriptionChange,
+                value = viewModel.description,
+                onValueChange = { viewModel.onDescriptionChange(it) },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
                 modifier = Modifier.height(12.dp)
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                    viewModel.saveExpense(userId = "user_001") {
+                        Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF1565C0),
@@ -235,6 +250,9 @@ fun Addpage_ExpenseDetail(
             ) {
                 Text(
                     text = stringResource(R.string.save_expense)
+                )
+                Spacer(
+                    modifier = Modifier.width(8.dp)
                 )
             }
         }
