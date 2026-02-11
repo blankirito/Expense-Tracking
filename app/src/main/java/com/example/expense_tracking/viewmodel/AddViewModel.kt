@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.expense_tracking.data.Repository.AddRepository
 import com.example.expense_tracking.data.model.Expense
 import kotlinx.coroutines.launch
+import com.example.expense_tracking.data.Constants.*
 
 class AddExpenseViewModel(
     private val repository: AddRepository = AddRepository()
@@ -22,7 +23,7 @@ class AddExpenseViewModel(
     var amount by mutableStateOf("")
         private set
 
-    var category by mutableStateOf("")
+    var category by mutableStateOf(CategoryConstants.CATEGORIES.first())
         private set
 
     var date by mutableStateOf("")

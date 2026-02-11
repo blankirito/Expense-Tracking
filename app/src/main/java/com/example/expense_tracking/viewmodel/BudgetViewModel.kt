@@ -85,4 +85,19 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
         }
     }
 
+    fun deleteCategory(category: String) {
+        viewModelScope.launch {
+            val budgetToDelete = _budgets.value.find { it.category == category }
+
+            budgetToDelete?.let {
+                repository.deleteBudget(it)
+            }
+
+            _budgets.value = _budgets.value.filter { it.category != category }
+
+            _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
+        }
+    }
+
+
 }

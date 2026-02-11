@@ -1,8 +1,11 @@
 package com.example.expense_tracking.ui.components
 
 import android.app.DatePickerDialog
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -25,6 +28,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.expense_tracking.R
 import java.util.Calendar
+import com.example.expense_tracking.data.Constants.*
+import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 
 
 @Composable
@@ -65,7 +70,7 @@ fun EditPasswordField(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var passwordVisible by remember { mutableStateOf(false) } // 控制显示/隐藏
+    var passwordVisible by remember { mutableStateOf(false) }
 
     TextField(
         value = value,
@@ -105,21 +110,48 @@ fun Editamountfield(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Editcategoryfield(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
+fun EditCategoryField(
+    viewModel: AddExpenseViewModel,
+    modifier: Modifier = Modifier,
+    options: List<String> = CategoryConstants.CATEGORIES
 ) {
-    TextField(
-        value = value,
-        singleLine = true,
-        modifier = modifier,
-        onValueChange = onValueChange,
-        label = { Text(stringResource(R.string.example_category)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-    )
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier.fillMaxWidth()
+    ) {
+        TextField(
+            value = viewModel.category,
+            onValueChange = { /* only for reading */ },
+            readOnly = true,
+            label = { Text("Category") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        viewModel.onCategoryChange(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
+
+
+
 
 @Composable
 fun Editdatefield(
@@ -163,7 +195,7 @@ fun Editdatefield(
         trailingIcon = {
             IconButton(onClick = { datePickerDialog.show() }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.calendar_today_24dp_e3e3e3_fill0_wght400_grad0_opsz24), // 你自己准备的日历图标
+                    painter = painterResource(id = R.drawable.calendar_today_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
                     contentDescription = "Select Date"
                 )
             }
@@ -233,6 +265,8 @@ fun WalletDropDown(
     )
     var expanded by remember { mutableStateOf(false) }
 
+    val selectedName = options.find { it.first == selectedOption }?.second ?: ""
+
     ExposedDropdownMenuBox(
         modifier = modifier,
         expanded = expanded,
@@ -240,7 +274,7 @@ fun WalletDropDown(
     ) {
 
         TextField(
-            value = selectedOption,
+            value = selectedName,
             onValueChange = {},
             readOnly = true,
             label = { Text("Account") },
@@ -268,3 +302,4 @@ fun WalletDropDown(
         }
     }
 }
+

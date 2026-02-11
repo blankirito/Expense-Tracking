@@ -23,11 +23,54 @@ enum class ExpenseTrackingScreen {
 
 @Composable
 fun ExpenseTrackingApplication() {
-    AppRoot(
-        loginViewModel = LoginViewModel(),
-        registerViewModel = RegisterViewModel()
-    )
+    AppEntryPoint()
 }
+
+@Composable
+fun AppEntryPoint() {
+    val auth = FirebaseAuth.getInstance()
+    var isLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
+
+    if (isLoggedIn) {
+        MainScaffold(currentUserId = auth.currentUser?.uid)
+    } else {
+        LoginRegisterWrapper(
+            onLoginSuccess = { isLoggedIn = true }
+        )
+    }
+}
+
+@Composable
+fun LoginRegisterWrapper(
+    onLoginSuccess: () -> Unit
+) {
+    var showLogin by remember { mutableStateOf(true) }
+
+    val loginViewModel = LoginViewModel()
+    val registerViewModel = RegisterViewModel()
+
+    if (showLogin) {
+        LoginPage(
+            viewModel = loginViewModel,
+            onLoginSuccess = {
+                loginViewModel.isLoggedIn = true
+                onLoginSuccess()
+            },
+            onRegisterClick = { showLogin = false }
+        )
+    } else {
+        RegisterPage(
+            viewModel = registerViewModel,
+            onRegisterSuccess = {
+                loginViewModel.isLoggedIn = true
+                onLoginSuccess()
+            },
+            onLoginClick = { showLogin = true }
+        )
+    }
+}
+
+
 
 @Composable
 fun AppRoot(

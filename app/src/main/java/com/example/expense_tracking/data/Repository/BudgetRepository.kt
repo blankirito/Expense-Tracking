@@ -103,4 +103,17 @@ class BudgetRepository {
         }
     }
 
+    suspend fun deleteBudget(budget: Budget) {
+        try {
+            firestore.collection("budgets")
+                .document(budget.id!!)
+                .delete()
+                .await()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+
+
 }

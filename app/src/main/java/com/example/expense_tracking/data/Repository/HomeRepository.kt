@@ -41,23 +41,30 @@ class HomeRepository {
     }
 
     suspend fun getUserThisMonthExpensesForAllAccounts(userId: String): Double {
-        return try {
-            val cal = Calendar.getInstance()
-            val yearMonth = SimpleDateFormat("yyyy-MM", Locale.US).format(cal.time)
+        val cal = Calendar.getInstance()
+        val currentMonth = cal.get(Calendar.MONTH)
+        val currentYear = cal.get(Calendar.YEAR)
 
-            val snapshot = firestore.collection("expenses")
-                .whereEqualTo("user_id", userId)
-                .get()
-                .await()
+        val snapshot = firestore.collection("expenses")
+            .whereEqualTo("user_id", userId)
+            .get()
+            .await()
 
-            snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
-                .filter { it.date?.startsWith(yearMonth) == true }
-                .sumOf { it.price ?: 0.0 }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            0.0
-        }
+        return snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
+            .filter { expense ->
+                expense.date?.let {
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    val expenseDate = try { sdf.parse(it) } catch(e: Exception) { null }
+                    expenseDate?.let { d ->
+                        val expCal = Calendar.getInstance().apply { time = d }
+                        expCal.get(Calendar.MONTH) == currentMonth &&
+                                expCal.get(Calendar.YEAR) == currentYear
+                    } ?: false
+                } ?: false
+            }
+            .sumOf { it.price ?: 0.0 }
     }
+
 
     suspend fun getUserRecentExpensesForAllAccounts(userId: String, limit: Int = 4): List<Expense> {
         return try {
@@ -72,6 +79,34 @@ class HomeRepository {
             e.printStackTrace()
             emptyList()
         }
+    }
+
+    suspend fun getUserThisMonthExpensesForAllAccountsDetailed(userId: String): List<Expense> {
+        val cal = Calendar.getInstance()
+        val yearMonth = SimpleDateFormat("yyyy-MM", Locale.US).format(cal.time)
+
+        val snapshot = firestore.collection("expenses")
+            .whereEqualTo("user_id", userId)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
+            .filter { it.date?.startsWith(yearMonth) == true }
+    }
+
+    suspend fun getUserThisMonthExpensesByCategory(userId: String): Map<String, Double> {
+        val cal = Calendar.getInstance()
+        val yearMonth = SimpleDateFormat("yyyy-MM", Locale.US).format(cal.time)
+
+        val snapshot = firestore.collection("expenses")
+            .whereEqualTo("user_id", userId)
+            .get()
+            .await()
+
+        return snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
+            .filter { it.date?.startsWith(yearMonth) == true }
+            .groupBy { it.category ?: "Others" }
+            .mapValues { (_, expenses) -> expenses.sumOf { it.price ?: 0.0 } }
     }
 
 }

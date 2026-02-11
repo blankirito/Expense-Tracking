@@ -22,7 +22,6 @@ import com.example.expense_tracking.R
 import com.example.expense_tracking.data.model.*
 import com.example.expense_tracking.ui.components.EditCurrencyfield
 import com.example.expense_tracking.ui.components.Editamountfield
-import com.example.expense_tracking.ui.components.Editcategoryfield
 import com.example.expense_tracking.ui.components.Editdatefield
 import com.example.expense_tracking.ui.components.Editdescriptionfield
 import com.example.expense_tracking.ui.components.*
@@ -208,9 +207,8 @@ fun Addpage_ExpenseDetail(
             Text(
                 text = stringResource(R.string.category)
             )
-            Editcategoryfield(
-                value = viewModel.category,
-                onValueChange = { viewModel.onCategoryChange(it) },
+            EditCategoryField(
+                viewModel = viewModel,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
@@ -250,7 +248,6 @@ fun Addpage_ExpenseDetail(
                                 userId = currentUserId,
                                 onSuccess = {
                                     Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
-                                    // ⚡ 触发 BudgetPage 刷新
                                     BudgetViewModel().loadUserData(currentUserId)
                                 },
                                 onError = { e ->

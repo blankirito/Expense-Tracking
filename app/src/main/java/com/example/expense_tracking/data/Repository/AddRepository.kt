@@ -45,6 +45,11 @@ class AddRepository {
             .get()
             .await()
 
+        val accountRef = firestore.collection("accounts").document(expense.account_id)
+        val accountSnap = accountRef.get().await()
+        val oldBalance = accountSnap.getDouble("current_balance") ?: 0.0
+        val newBalance = oldBalance - expense.price // 扣掉花费
+
         if (budgetQuerySnapshot.isEmpty) {
             val newBudget = Budget(
                 id = java.util.UUID.randomUUID().toString(),
@@ -54,13 +59,14 @@ class AddRepository {
                 limit = 0.0,
                 spend = expense.price
             )
-            // 同时写入 Budget 和 Expense
             firestore.runBatch { batch ->
                 val budgetRef = firestore.collection("budgets").document(newBudget.id)
                 batch.set(budgetRef, newBudget)
 
                 val expenseRef = firestore.collection("expenses").document(expense.id)
                 batch.set(expenseRef, expense)
+
+                batch.update(accountRef, "current_balance", newBalance)
             }.await()
         } else {
             val budgetDocRef = budgetQuerySnapshot.documents.first().reference
@@ -73,9 +79,13 @@ class AddRepository {
                 val expenseRef = firestore.collection("expenses").document(expense.id)
                 transaction.set(expenseRef, expense)
 
+                // 2️⃣ 更新账户余额
+                transaction.update(accountRef, "current_balance", newBalance)
+
                 null
             }.await()
         }
     }
+
 
 }

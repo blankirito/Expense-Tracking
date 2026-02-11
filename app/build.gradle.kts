@@ -67,10 +67,11 @@ dependencies {
     implementation ("androidx.compose.material3:material3:1.2.0-alpha03")
     implementation ("androidx.compose.runtime:runtime-livedata:1.6.0")
 
-    // ViewModel
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
 
-    // Compose 与 ViewModel 集成
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+
+    //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 }
