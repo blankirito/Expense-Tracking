@@ -169,7 +169,13 @@ fun MainScaffold(currentUserId: String?) {
                     Text("Loading user info...")
                 }
             }
-            ExpenseTrackingScreen.Profile -> ProfilePage(modifier)
+            ExpenseTrackingScreen.Profile -> {
+                if (currentUserId != null) {
+                    ProfilePage(userId = currentUserId)
+                } else {
+                    Text("Loading user info...")
+                }
+            }
         }
     }
 }

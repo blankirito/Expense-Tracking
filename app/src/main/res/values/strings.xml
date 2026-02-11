@@ -82,6 +82,7 @@
     <string name="ewallet">E Wallet</string>
     <string name="currency">Currency</string>
     <string name="edit_budget">Edit Budget</string>
+    <string name="unknown_account">Unknown Account</string>
     <string name="security">Security</string>
     <string name="change_password">Change password</string>
     <string name="change_email">Change email</string>

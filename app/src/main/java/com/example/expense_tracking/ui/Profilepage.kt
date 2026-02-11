@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -23,12 +24,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,14 +46,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
+import com.example.expense_tracking.data.UiState.ProfileUiState
+import com.example.expense_tracking.ui.components.ChangeEmailDialog
+import com.example.expense_tracking.ui.components.ChangePasswordDialog
+import com.example.expense_tracking.ui.components.EditProfileDialog
+import com.example.expense_tracking.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfilePage(
     modifier: Modifier = Modifier,
-    //viewModel: ExpenseTrackingViewModel = ExpenseTrackingViewModel(),
+    userId: String,
+    viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+
+    val uistate by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile(userId)
+    }
 
     var selectedTab by remember { mutableStateOf("Profile") }
 
@@ -136,24 +153,35 @@ fun ProfilePage(
             Spacer(modifier = Modifier.padding(8.dp))
             Text(text = stringResource(R.string.profile_intro))
             Spacer(modifier = Modifier.padding(8.dp))
-
-            Profilepage_Information(modifier = Modifier.fillMaxWidth())
+            Profilepage_Information(
+                uistate = uistate,
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.padding(8.dp))
             Profilepage_AccountDetail(
+                username = uistate.name,
+                email = uistate.email,
+                phone = uistate.phone,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.padding(8.dp))
             Profilepage_WalletDetail(
+                uistate = uistate,
+                viewModel = viewModel,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.padding(8.dp))
-            Profilepage_Security(modifier = Modifier.fillMaxWidth())
+            Profilepage_Security(
+                viewModel = viewModel,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.padding(8.dp))
             Profilepage_Preferences(modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
-                onClick = { /*viewModel.logout()*/ },
+                onClick = { viewModel.logout() },
                 modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x80FFFFFF )
@@ -177,9 +205,11 @@ fun ProfilePage(
 @Composable
 fun Profilepage_Information(
     modifier: Modifier = Modifier,
-    name: String = "John Doe",
-    email: String = "john.doe@email.com",
+    uistate: ProfileUiState,
+    viewModel: ProfileViewModel
 ) {
+    var showEditProfileDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -194,16 +224,16 @@ fun Profilepage_Information(
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
-            Text(text = name)
+            Text(text = uistate.name)
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
-            Text(text = email)
+            Text(text = uistate.email)
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { showEditProfileDialog = true },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
@@ -217,14 +247,25 @@ fun Profilepage_Information(
                 Text(text = stringResource(R.string.edit_profile))
             }
         }
+        if (showEditProfileDialog) {
+            EditProfileDialog(
+                currentName = uistate.name,
+                currentPhone = uistate.phone,
+                onConfirm = { name, phone ->
+                    viewModel.updateProfile(name, phone)
+                    showEditProfileDialog = false
+                },
+                onDismiss = { showEditProfileDialog = false }
+            )
+        }
     }
 }
 
 @Composable
 fun Profilepage_AccountDetail(
-    username: String = "John Doe",
-    email: String = "johndoe@example.com",
-    phone: String = "+1 (555)123-4567",
+    username: String,
+    email: String,
+    phone: String,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -303,12 +344,12 @@ fun Profilepage_AccountDetail(
 
 @Composable
 fun Profilepage_WalletDetail(
-    cash: String = "0.00",
-    ewallet: String = "0.00",
-    bank: String = "0.00",
-    currency: String = "$",
+    uistate: ProfileUiState,
+    viewModel: ProfileViewModel,
     modifier: Modifier = Modifier
 ) {
+    var showEditBudgetDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -319,20 +360,13 @@ fun Profilepage_WalletDetail(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(text = stringResource(R.string.wallet_detail))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.padding(4.dp))
             Text(text = stringResource(R.string.currency))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
+            Spacer(modifier = Modifier.padding(4.dp))
 
-            )
             Card(
-                modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF4CAF50)
-                ),
+                modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF4CAF50)),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
@@ -341,21 +375,15 @@ fun Profilepage_WalletDetail(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = currency
-                    )
+                    Text(text = uistate.currency)
                 }
             }
+
             Text(text = stringResource(R.string.cash))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.padding(4.dp))
             Card(
-                modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE6F7E6)
-                ),
+                modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE6F7E6)),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
@@ -363,25 +391,16 @@ fun Profilepage_WalletDetail(
                         .fillMaxWidth()
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
-                )  {
-                    Text(
-                        text = cash
-                    )
+                ) {
+                    Text(text = uistate.cash.toString())
                 }
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+
             Text(text = stringResource(R.string.bank))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.padding(4.dp))
             Card(
-                modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE6F0FF)
-                ),
+                modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE6F0FF)),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
@@ -389,25 +408,16 @@ fun Profilepage_WalletDetail(
                         .fillMaxWidth()
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
-                )  {
-                    Text(
-                        text = bank
-                    )
+                ) {
+                    Text(text = uistate.bank.toString())
                 }
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+
             Text(text = stringResource(R.string.ewallet))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.padding(4.dp))
             Card(
-                modifier
-                    .fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFFFF5E6)
-                ),
+                modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5E6)),
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Row(
@@ -415,17 +425,15 @@ fun Profilepage_WalletDetail(
                         .fillMaxWidth()
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
-                )  {
-                    Text(
-                        text = ewallet
-                    )
+                ) {
+                    Text(text = uistate.ewallet.toString())
                 }
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+
+            Spacer(modifier = Modifier.padding(4.dp))
+
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { showEditBudgetDialog = true },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
@@ -440,47 +448,96 @@ fun Profilepage_WalletDetail(
             }
         }
     }
+
+    if (showEditBudgetDialog) {
+        var cashText by remember { mutableStateOf(uistate.cash.toString()) }
+        var bankText by remember { mutableStateOf(uistate.bank.toString()) }
+        var ewalletText by remember { mutableStateOf(uistate.ewallet.toString()) }
+
+        AlertDialog(
+            onDismissRequest = { showEditBudgetDialog = false },
+            title = { Text(text = "Edit Budget") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = cashText,
+                        onValueChange = { cashText = it },
+                        label = { Text("Cash") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = bankText,
+                        onValueChange = { bankText = it },
+                        label = { Text("Bank") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = ewalletText,
+                        onValueChange = { ewalletText = it },
+                        label = { Text("Ewallet") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val cash = cashText.toDoubleOrNull() ?: uistate.cash
+                        val bank = bankText.toDoubleOrNull() ?: uistate.bank
+                        val ewallet = ewalletText.toDoubleOrNull() ?: uistate.ewallet
+
+                        viewModel.updateBudget(cash, bank, ewallet)
+
+                        showEditBudgetDialog = false
+                    }
+                ) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showEditBudgetDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
+
 
 @Composable
 fun Profilepage_Security(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel
 ) {
+    var showChangeEmailDialog by remember { mutableStateOf(false) }
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(text = stringResource(R.string.security))
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.height(4.dp))
+
             Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .fillMaxWidth(),
+                onClick = { showChangePasswordDialog = true },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x80FFFFFF),
                     contentColor = Color.Black
                 ),
-                border = BorderStroke(0.5.dp, Color.Gray),
-                contentPadding = PaddingValues(0.dp)
+                border = BorderStroke(0.5.dp, Color.Gray)
             ) {
                 Text(text = stringResource(R.string.change_password))
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             Button(
-                onClick = { /*TODO*/ },
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .fillMaxWidth(),
+                onClick = { showChangeEmailDialog = true },
+                modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x80FFFFFF),
@@ -492,7 +549,28 @@ fun Profilepage_Security(
             }
         }
     }
+
+    if (showChangePasswordDialog) {
+        ChangePasswordDialog(
+            onConfirm = { oldPassword, newPassword ->
+                viewModel.changePassword(newPassword)
+                showChangePasswordDialog = false
+            },
+            onDismiss = { showChangePasswordDialog = false }
+        )
+    }
+
+    if (showChangeEmailDialog) {
+        ChangeEmailDialog(
+            onConfirm = { currentPassword, newEmail ->
+                viewModel.changeEmail(currentPassword, newEmail)
+                showChangeEmailDialog = false
+            },
+            onDismiss = { showChangeEmailDialog = false }
+        )
+    }
 }
+
 
 @Composable
 fun Profilepage_Preferences(
@@ -566,6 +644,9 @@ fun Profilepage_Preferences(
 @Composable
 fun ProfilePreview() {
     ExpenseTrackingApplicationTheme {
-        ProfilePage()
+        ProfilePage(
+            userId = "user_id",
+            viewModel = viewModel()
+        )
     }
 }
