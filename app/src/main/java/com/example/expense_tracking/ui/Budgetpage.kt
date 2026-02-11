@@ -175,13 +175,16 @@ fun BudgetPage(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
-                text = stringResource(R.string.budget_tracker)
+                text = stringResource(R.string.budget_tracker),
+                fontSize = 25.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
             Spacer(
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(4.dp)
             )
             Text(
-                text = stringResource(R.string.budget_tracker_intro)
+                text = stringResource(R.string.budget_tracker_intro),
+                color = Color(0xFF424242)
             )
             Spacer(
                 modifier = Modifier.padding(8.dp)
@@ -286,9 +289,19 @@ fun BudgetPage(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
-                text = stringResource(R.string.monthly_budget)
-            )
+            Row {
+                Icon(
+                    painter =painterResource(R.drawable.wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
+                    contentDescription = "null",
+                    modifier = Modifier
+                )
+                Spacer(
+                    modifier = Modifier.padding(4.dp)
+                )
+                Text(
+                    text = stringResource(R.string.monthly_budget)
+                )
+            }
             Spacer( modifier = Modifier.padding(4.dp) )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -297,19 +310,21 @@ fun BudgetPage(
                 Column {
                     Row {
                         Text(
-                            text = currency
+                            text = currency,
+                            fontSize = 24.sp
                         )
                         Spacer(modifier = Modifier.padding(1.dp))
                         Text(
-                            text = total_cost.toString()
+                            text = total_cost.toString(),
+                            fontSize = 24.sp
                         )
                     }
                     Row {
-                        Text(text = "of ")
+                        Text(text = "of ", fontSize = 12.sp)
                         Row {
-                            Text(text = currency)
+                            Text(text = currency, fontSize = 14.sp)
                             Spacer(modifier = Modifier.padding(1.dp))
-                            Text(text = TotalBudget.toString())
+                            Text(text = TotalBudget.toString(), fontSize = 14.sp)
                         }
                     }
                 }
@@ -317,10 +332,10 @@ fun BudgetPage(
                     horizontalAlignment = Alignment.End
                 ) {
                     Row {
-                        Text(text = percentage.toString())
-                        Text(text = "%")
+                        Text(text = percentage.toString(), fontSize = 20.sp)
+                        Text(text = "%", fontSize = 20.sp)
                     }
-                    Text(text = "used") }
+                    Text(text = "used", fontSize = 14.sp) }
             }
             Spacer( modifier = Modifier.padding(4.dp) )
             LinearProgressIndicator(
@@ -343,7 +358,6 @@ fun Budgetpage_CategoryBudgets(
     val categorySpends by viewModel.categorySpends.collectAsState()
     val budgets by viewModel.budgets.collectAsState()
 
-    // 先生成 category -> spend -> limit -> percentage 的 list
     val sortedCategories = categorySpends.map { (category, spend) ->
         val limit = budgets.find { it.category == category }?.limit ?: 0.0
         val percentage = if (limit > 0) (spend * 100 / limit).toInt() else 0
@@ -394,7 +408,11 @@ fun Budgetpage_CategoryBudgetItem(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(text = category)
+                Text(
+                    text = category,
+                    fontSize = 20.sp,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Edit,
@@ -405,24 +423,42 @@ fun Budgetpage_CategoryBudgetItem(
             }
             Spacer(modifier = Modifier.padding(4.dp))
             Row {
-                Text(text = currency)
-                Text(text = spend.toString())
-                Spacer(modifier = Modifier.padding(4.dp))
+                Text(
+                    text = currency,
+                    fontSize = 14.sp
+                )
+                Spacer(
+                    modifier = Modifier.padding(1.dp)
+                )
+                Text(text = spend.toString(),
+                    fontSize = 14.sp)
+                Spacer(modifier = Modifier.padding(2.dp))
                 Text(text = "/")
-                Spacer(modifier = Modifier.padding(4.dp))
-                Text(text = currency)
-                Text(text = limit.toString())
-            }
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "$percentage% used")
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = currency)
-                Text(text = remaining.toString())
-                Text(text = " left")
+                Spacer(modifier = Modifier.padding(2.dp))
+                Text(text = currency,
+                    fontSize = 14.sp,
+                    color = Color(0xFF424242))
+                Spacer(
+                    modifier = Modifier.padding(1.dp)
+                )
+                Text(text = limit.toString(),
+                    fontSize = 14.sp,
+                    color = Color(0xFF424242)
+                    )
             }
             Spacer(modifier = Modifier.padding(4.dp))
             LinearProgressIndicator(progress = percentage / 100f, modifier = Modifier.fillMaxWidth(), color = Color.Black, trackColor = Color.LightGray)
             Spacer(modifier = Modifier.padding(4.dp))
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "$percentage% used", fontSize = 12.sp)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = currency, fontSize = 12.sp)
+                Spacer(
+                    modifier = Modifier.padding(1.dp)
+                )
+                Text(text = remaining.toString(), fontSize = 12.sp)
+                Text(text = " left", fontSize = 12.sp)
+            }
         }
     }
 

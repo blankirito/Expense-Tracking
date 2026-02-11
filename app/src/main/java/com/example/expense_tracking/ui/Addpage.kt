@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,9 +126,13 @@ fun AddPage(
         ) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(text = stringResource(R.string.add_expense))
+            Text(
+                text = stringResource(R.string.add_expense),
+                fontSize = 20.sp
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = stringResource(R.string.add_expense_intro))
+            Text(text = stringResource(R.string.add_expense_intro),
+                color = Color(0xFF424242))
             Spacer(modifier = Modifier.height(12.dp))
 
             Addpage_ExpenseDetail(
@@ -160,13 +165,15 @@ fun Addpage_ExpenseDetail(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = stringResource(R.string.expense_detail)
+                text = stringResource(R.string.expense_detail),
+                fontSize = 18.sp
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(12.dp)
             )
             Text(
-                text = stringResource(R.string.currency)
+                text = stringResource(R.string.currency),
+                fontWeight = Bold
             )
             EditCurrencyfield(
                 value = viewModel.currency,
@@ -174,13 +181,14 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(16.dp)
             )
             Text(
-                text = stringResource(R.string.wallet)
+                text = stringResource(R.string.wallet),
+                fontWeight = Bold
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(12.dp)
             )
             WalletDropDown(
                 modifier = Modifier.fillMaxWidth(),
@@ -191,10 +199,11 @@ fun Addpage_ExpenseDetail(
             )
 
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(16.dp)
             )
             Text(
-                text = stringResource(R.string.amount)
+                text = stringResource(R.string.amount),
+                fontWeight = Bold
             )
             Editamountfield(
                 value = viewModel.amount,
@@ -202,20 +211,22 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(16.dp)
             )
             Text(
-                text = stringResource(R.string.category)
+                text = stringResource(R.string.category),
+                fontWeight = Bold
             )
             EditCategoryField(
                 viewModel = viewModel,
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(16.dp)
             )
             Text(
-                text = stringResource(R.string.date)
+                text = stringResource(R.string.date),
+                fontWeight = Bold
             )
             Editdatefield(
                 value = viewModel.date,
@@ -223,10 +234,11 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
-                modifier = Modifier.height(8.dp)
+                modifier = Modifier.height(16.dp)
             )
             Text(
-                text = stringResource(R.string.description)
+                text = stringResource(R.string.description),
+                fontWeight = Bold
             )
             Editdescriptionfield(
                 value = viewModel.description,
@@ -234,7 +246,7 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(
-                modifier = Modifier.height(12.dp)
+                modifier = Modifier.height(16.dp)
             )
             Button(
                 onClick = {

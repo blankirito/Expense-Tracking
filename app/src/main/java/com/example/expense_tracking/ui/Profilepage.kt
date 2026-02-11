@@ -42,6 +42,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -149,9 +151,13 @@ fun ProfilePage(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text(text = stringResource(R.string.profile))
-            Spacer(modifier = Modifier.padding(8.dp))
-            Text(text = stringResource(R.string.profile_intro))
+            Text(
+                text = stringResource(R.string.profile),
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.padding(4.dp))
+            Text(text = stringResource(R.string.profile_intro), color = Color(0xFF424242))
             Spacer(modifier = Modifier.padding(8.dp))
             Profilepage_Information(
                 uistate = uistate,
@@ -224,11 +230,11 @@ fun Profilepage_Information(
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
-            Text(text = uistate.name)
+            Text(text = uistate.name, fontSize = 20.sp)
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
-            Text(text = uistate.email)
+            Text(text = uistate.email, fontSize = 16.sp)
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
@@ -279,11 +285,11 @@ fun Profilepage_AccountDetail(
         ) {
             Text(text = stringResource(R.string.account_detail))
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(12.dp)
             )
-            Text(text = stringResource(R.string.fullname))
+            Text(text = stringResource(R.string.fullname), fontWeight = FontWeight.Bold)
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(2.dp)
             )
             Card(
                 modifier
@@ -299,11 +305,11 @@ fun Profilepage_AccountDetail(
                 )
             }
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(8.dp)
             )
-            Text(text = stringResource(R.string.email))
+            Text(text = stringResource(R.string.email), fontWeight = FontWeight.Bold)
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(2.dp)
             )
             Card(
                 modifier
@@ -319,11 +325,11 @@ fun Profilepage_AccountDetail(
                 )
             }
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(8.dp)
             )
-            Text(text = stringResource(R.string.phone_num))
+            Text(text = stringResource(R.string.phone_num), fontWeight = FontWeight.Bold)
             Spacer(
-                modifier = Modifier.padding(4.dp)
+                modifier = Modifier.padding(2.dp)
             )
             Card(
                 modifier
@@ -360,10 +366,9 @@ fun Profilepage_WalletDetail(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(text = stringResource(R.string.wallet_detail))
-            Spacer(modifier = Modifier.padding(4.dp))
-            Text(text = stringResource(R.string.currency))
-            Spacer(modifier = Modifier.padding(4.dp))
-
+            Spacer(modifier = Modifier.padding(12.dp))
+            Text(text = stringResource(R.string.currency), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.padding(2.dp))
             Card(
                 modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF4CAF50)),
@@ -378,9 +383,11 @@ fun Profilepage_WalletDetail(
                     Text(text = uistate.currency)
                 }
             }
-
-            Text(text = stringResource(R.string.cash))
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(
+                modifier = Modifier.padding(8.dp)
+            )
+            Text(text = stringResource(R.string.cash), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.padding(2.dp))
             Card(
                 modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE6F7E6)),
@@ -395,9 +402,11 @@ fun Profilepage_WalletDetail(
                     Text(text = uistate.cash.toString())
                 }
             }
-
-            Text(text = stringResource(R.string.bank))
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(
+                modifier = Modifier.padding(8.dp)
+            )
+            Text(text = stringResource(R.string.bank), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.padding(2.dp))
             Card(
                 modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE6F0FF)),
@@ -412,9 +421,11 @@ fun Profilepage_WalletDetail(
                     Text(text = uistate.bank.toString())
                 }
             }
-
-            Text(text = stringResource(R.string.ewallet))
-            Spacer(modifier = Modifier.padding(4.dp))
+            Spacer(
+                modifier = Modifier.padding(8.dp)
+            )
+            Text(text = stringResource(R.string.ewallet), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.padding(2.dp))
             Card(
                 modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF5E6)),
@@ -517,7 +528,7 @@ fun Profilepage_Security(
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = stringResource(R.string.security))
+            Text(text = stringResource(R.string.security), fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(4.dp))
 
             Button(
@@ -586,7 +597,7 @@ fun Profilepage_Preferences(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = stringResource(R.string.preferences))
+            Text(text = stringResource(R.string.preferences), fontWeight = FontWeight.Bold)
             Spacer(
                 modifier = Modifier.padding(4.dp)
             )
@@ -597,7 +608,7 @@ fun Profilepage_Preferences(
                 // icons
                 Column {
                     Text(text = stringResource(R.string.push_notification))
-                    Text(text = stringResource(R.string.push_notigication_intro), fontSize = 14.sp)
+                    Text(text = stringResource(R.string.push_notigication_intro), fontSize = 14.sp, color = Color(0xFF424242))
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Switch(
@@ -621,7 +632,7 @@ fun Profilepage_Preferences(
                 // icons
                 Column {
                     Text(text = stringResource(R.string.language))
-                    Text(text = Language, fontSize = 14.sp)
+                    Text(text = Language, fontSize = 14.sp, color = Color(0xFF424242))
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Button(

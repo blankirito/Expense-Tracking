@@ -3,6 +3,7 @@ package com.example.expense_tracking.ui
 import android.R.attr.top
 import androidx.annotation.ColorRes
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -50,8 +51,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.R
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.data.Constants.CategoryConstants
@@ -280,17 +284,29 @@ fun Homepage_totalBalance(
             modifier = Modifier.padding(16.dp)
         ) {
             Row {
+                Image(
+                    painter = painterResource(id = R.drawable.attach_money_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
+                    contentDescription = null,
+                )
+                Spacer(
+                    modifier = Modifier.padding(4.dp)
+                )
                 Text(
                     text = stringResource(R.string.totalBalance)
                 )
             }
+            Spacer(
+                modifier = Modifier.padding(4.dp)
+            )
             Row {
                 Text(
-                    text = currency
+                    text = currency,
+                    fontSize = 24.sp
                 )
                 Spacer(modifier = Modifier.padding(1.dp))
                 Text(
-                    text = amount.toString()
+                    text = amount.toString(),
+                    fontSize = 24.sp
                 )
             }
         }
@@ -313,14 +329,27 @@ fun Homepage_thisMonth(
             modifier = Modifier.padding(16.dp)
         ) {
             Row {
+                Icon(
+                    painter = painterResource(id = R.drawable.wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
+                    contentDescription = null,
+                    tint = Color(0xFF2196F3)
+                )
+                Spacer(
+                    modifier = Modifier.padding(4.dp)
+                )
                 Text(
                     text = stringResource(R.string.thisMonth)
                 )
             }
+            Spacer(
+                modifier = Modifier.padding(4.dp)
+            )
             Row {
-                Text(text = currency)
+                Text(text = currency,
+                    fontSize = 24.sp)
                 Spacer(modifier = Modifier.padding(1.dp))
-                Text(text = amount.toString())
+                Text(text = amount.toString(),
+                    fontSize = 24.sp)
             }
         }
     }
@@ -340,7 +369,10 @@ fun Homepage_MonthlyTrends(
         Column {
             Text(
                 text = stringResource(R.string.monthlyTrend),
-                modifier = Modifier.padding(10.dp)
+                modifier = Modifier.padding(start = 20.dp, top = 16.dp)
+            )
+            Spacer(
+                modifier = Modifier.padding(4.dp)
             )
             MonthlyTrendsChart(
                 expensesByDay = dailyExpense,
@@ -471,12 +503,12 @@ fun Homepage_ExpenseSummary(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = stringResource(R.string.expenseSummary),
-                style = MaterialTheme.typography.titleMedium
+                modifier = Modifier.padding(start = 8.dp)
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            //
+
             if (categoryExpenses.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -578,9 +610,12 @@ fun Homepage_SpendingPredictions(modifier: Modifier = Modifier) {
             containerColor = Color.White
         )
     ) {
+        Spacer(
+            modifier = Modifier.padding(8.dp)
+        )
         Text(
             text = stringResource(R.string.spendingPrediction),
-            modifier = modifier.padding(10.dp)
+            modifier = modifier.padding(start = 8.dp)
         )
     }
 }
@@ -599,9 +634,12 @@ fun Homepage_RecentTransactions(
         Column(
             modifier = Modifier.fillMaxWidth().padding(10.dp)
         ) {
+            Spacer(
+                modifier = Modifier.padding(4.dp)
+            )
             Text(
                 text = stringResource(R.string.recentTransaction),
-                modifier = modifier.padding(10.dp)
+                modifier = modifier.padding(start = 1.dp)
             )
             Spacer(
                 modifier = Modifier.padding(8.dp)
