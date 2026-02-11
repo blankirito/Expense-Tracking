@@ -15,6 +15,12 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
     private val _accounts = MutableStateFlow<List<Account>>(emptyList())
     val accounts: StateFlow<List<Account>> = _accounts
 
+    private val _currency = MutableStateFlow("")
+    val currency: StateFlow<String> = _currency
+
+    private val _currencies = MutableStateFlow<List<String>>(emptyList())
+    val currencies: StateFlow<List<String>> = _currencies
+
     private val _totalBalance = MutableStateFlow(0.0)
     val totalBalance: StateFlow<Double> = _totalBalance
 
@@ -33,6 +39,8 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
             _accounts.value = accounts
             _totalBalance.value = accounts.sumOf { it.current_balance ?: 0.0 }
 
+            _currencies.value = repository.getUserAccountCurrency(userId)
+            _currency.value = _currencies.value.firstOrNull() ?: "MYR"
             _thisMonthExpenses.value = repository.getUserThisMonthExpensesForAllAccounts(userId)
             _recentExpenses.value = repository.getUserRecentExpensesForAllAccounts(userId)
         }

@@ -2,12 +2,14 @@ package com.example.expense_tracking.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +28,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,12 +44,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.R
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
+import com.example.expense_tracking.viewmodel.BudgetViewModel
 
 @Composable
 fun BudgetPage(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userId: String,
+   viewModel: BudgetViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
+
+    LaunchedEffect(userId) {
+        viewModel.loadUserData(userId)
+    }
+
+    val accounts by viewModel.accounts.collectAsState()
+    val currency by viewModel.currency.collectAsState()
+    val totalSpend by viewModel.totalSpend.collectAsState()
+    val totalLimit by viewModel.totalLimit.collectAsState()
+
+
 
     var selectedTab by remember { mutableStateOf("Budget") }
 
@@ -146,6 +165,8 @@ fun BudgetPage(
         }
     ) { innerPadding ->
 
+        var showAddDialog by remember { mutableStateOf(false) }
+
         Column(
             modifier = Modifier.fillMaxSize()
                 .padding(innerPadding)
@@ -165,11 +186,16 @@ fun BudgetPage(
                 modifier = Modifier.padding(8.dp)
             )
             Budgetpage_TotalMonthlyBudget(
+                total_cost = totalSpend.toInt(),
+                TotalBudget = totalLimit.toInt(),
+                currency = currency
             )
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )
-            Budgetpage_CategoryBudget(
+            Budgetpage_CategoryBudgets(
+                viewModel = viewModel,
+                currency = currency,
                 modifier = Modifier
                     .fillMaxWidth()
             )
@@ -177,7 +203,7 @@ fun BudgetPage(
                 modifier = Modifier.padding(8.dp)
             )
             Button(
-                onClick = { /*TODO*/ },
+                onClick = { showAddDialog = true },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth(),
@@ -192,6 +218,49 @@ fun BudgetPage(
                     text = stringResource(R.string.add_new_category)
                 )
             }
+
+            if (showAddDialog) {
+                var newCategory by remember { mutableStateOf("") }
+                var newLimit by remember { mutableStateOf("") }
+
+                androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showAddDialog = false },
+                    title = { Text(text = "Add New Category") },
+                    text = {
+                        Column {
+                            androidx.compose.material3.OutlinedTextField(
+                                value = newCategory,
+                                onValueChange = { newCategory = it },
+                                label = { Text("Category Name") }
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.OutlinedTextField(
+                                value = newLimit,
+                                onValueChange = { newLimit = it },
+                                label = { Text("Budget Limit") },
+                                singleLine = true
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            val parsedLimit = newLimit.toDoubleOrNull() ?: 0.0
+                            if (newCategory.isNotBlank() && parsedLimit > 0) {
+                                viewModel.addNewCategory(newCategory, parsedLimit)
+                                showAddDialog = false
+                            }
+                        }) {
+                            Text("Add")
+                        }
+                    },
+                    dismissButton = {
+                        Button(onClick = { showAddDialog = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )
@@ -200,20 +269,16 @@ fun BudgetPage(
     }
 }
 
-@Composable
-fun Budgetpage_TotalMonthlyBudget(
+@Composable fun Budgetpage_TotalMonthlyBudget(
     modifier: Modifier = Modifier,
-    total_cost: Int = 2830,
-    currency: String = "$",
-    TotalBudget: Int = 3200
-) {
-    val percentage =
-        if (TotalBudget > 0) (total_cost * 100) / TotalBudget else 0
-
+    total_cost: Int,
+    currency: String,
+    TotalBudget: Int
+){
+    val percentage = if (TotalBudget > 0) (total_cost * 100) / TotalBudget else 0
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1565C0),
+        colors = CardDefaults.cardColors( containerColor = Color(0xFF1565C0),
             contentColor = Color.White
         )
     ) {
@@ -223,22 +288,26 @@ fun Budgetpage_TotalMonthlyBudget(
             Text(
                 text = stringResource(R.string.monthly_budget)
             )
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer( modifier = Modifier.padding(4.dp) )
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Column {
                     Row {
-                        Text(text = currency)
-                        Text(text = total_cost.toString())
+                        Text(
+                            text = currency
+                        )
+                        Spacer(modifier = Modifier.padding(1.dp))
+                        Text(
+                            text = total_cost.toString()
+                        )
                     }
                     Row {
                         Text(text = "of ")
                         Row {
                             Text(text = currency)
+                            Spacer(modifier = Modifier.padding(1.dp))
                             Text(text = TotalBudget.toString())
                         }
                     }
@@ -250,94 +319,155 @@ fun Budgetpage_TotalMonthlyBudget(
                         Text(text = percentage.toString())
                         Text(text = "%")
                     }
-                    Text(text = "used")
-                }
+                    Text(text = "used") }
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer( modifier = Modifier.padding(4.dp) )
             LinearProgressIndicator(
                 progress = percentage / 100f,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                color = Color.Black,
-                trackColor = Color.LightGray
+                modifier = Modifier .fillMaxWidth(),
+                color = Color.Black, trackColor = Color.LightGray
             )
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer( modifier = Modifier.padding(4.dp) )
         }
     }
 }
 
+
 @Composable
-fun Budgetpage_CategoryBudget(
+fun Budgetpage_CategoryBudgets(
     modifier: Modifier = Modifier,
-    category: String = "Food & Dining",
-    total_cost: Int = 800,
-    currency: String = "$",
-    total_cost_usage: Int = 650,
-    total_cost_remaining: Int = 150,
+    viewModel: BudgetViewModel,
+    currency: String
 ) {
-    val percentage =
-        if (total_cost > 0) (total_cost_usage * 100) / total_cost else 0
+    val categorySpends by viewModel.categorySpends.collectAsState()
+    val budgets by viewModel.budgets.collectAsState()
+
+    // 先生成 category -> spend -> limit -> percentage 的 list
+    val sortedCategories = categorySpends.map { (category, spend) ->
+        val limit = budgets.find { it.category == category }?.limit ?: 0.0
+        val percentage = if (limit > 0) (spend * 100 / limit).toInt() else 0
+        Triple(category, spend, limit) to percentage
+    }.sortedByDescending { it.second } // 根据 percentage 排序
+
+    Column(modifier = modifier) {
+        sortedCategories.forEach { (data, _) ->
+            val (category, spend, limit) = data
+            val remaining = limit - spend
+            val percentage = if (limit > 0) (spend * 100 / limit).toInt() else 0
+
+            Budgetpage_CategoryBudgetItem(
+                category = category,
+                spend = spend,
+                limit = limit,
+                remaining = remaining,
+                percentage = percentage,
+                currency = currency,
+                onEditCategory = { newCategory, newLimit ->
+                    viewModel.updateCategory(category, newCategory, newLimit)
+                }
+            )
+            Spacer(modifier = Modifier.padding(8.dp))
+        }
+    }
+}
+
+
+@Composable
+fun Budgetpage_CategoryBudgetItem(
+    category: String,
+    spend: Double,
+    limit: Double,
+    remaining: Double,
+    percentage: Int,
+    currency: String,
+    onEditCategory: (String, Double) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
 
     Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = category)
-                // edit icons later need add
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit category"
+                    contentDescription = "Edit category",
+                    modifier = Modifier
+                        .clickable { showDialog = true }
                 )
             }
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+            Spacer(modifier = Modifier.padding(4.dp))
             Row {
                 Text(text = currency)
-                Text(text = total_cost_usage.toString())
+                Text(text = spend.toString())
                 Spacer(modifier = Modifier.padding(4.dp))
                 Text(text = "/")
                 Spacer(modifier = Modifier.padding(4.dp))
                 Text(text = currency)
-                Text(text = total_cost.toString())
+                Text(text = limit.toString())
             }
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(text = percentage.toString())
-                Text(text = "% used")
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "$percentage% used")
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = currency)
-                Text(text = total_cost_remaining.toString())
+                Text(text = remaining.toString())
                 Text(text = " left")
             }
             Spacer(modifier = Modifier.padding(4.dp))
-            LinearProgressIndicator(
-                progress = percentage / 100f,
-                modifier = Modifier
-                    .fillMaxWidth(),
-                color = Color.Black,
-                trackColor = Color.LightGray
-            )
+            LinearProgressIndicator(progress = percentage / 100f, modifier = Modifier.fillMaxWidth(), color = Color.Black, trackColor = Color.LightGray)
             Spacer(modifier = Modifier.padding(4.dp))
         }
     }
+
+    if (showDialog) {
+        var newCategory by remember { mutableStateOf(category) }
+        var newLimit by remember { mutableStateOf(limit.toString())}
+
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text(text = "Edit Category") },
+            text = {
+                Column {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = newCategory,
+                        onValueChange = { newCategory = it },
+                        label = { Text("Category Name") }
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    androidx.compose.material3.OutlinedTextField(
+                        value = newLimit,
+                        onValueChange = { newLimit = it },
+                        label = { Text("Budget Limit") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        val parsedLimit = newLimit.toDoubleOrNull() ?: limit
+                        onEditCategory(newCategory, parsedLimit)
+                        showDialog = false
+                    }
+                ) {
+                    Text("Save")
+                    }
+            },
+            dismissButton = {
+                Button(
+                  onClick = { showDialog = false }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
+
+
 
 @Composable
 fun Budgetpage_Tip(
@@ -362,6 +492,8 @@ fun Budgetpage_Tip(
 @Composable
 fun BudgetPreview() {
     ExpenseTrackingApplicationTheme {
-        BudgetPage()
+        BudgetPage(
+            userId = "preview_user"
+        )
     }
 }

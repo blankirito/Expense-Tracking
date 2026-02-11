@@ -61,6 +61,7 @@ fun HomePage(
     }
     val accounts by viewModel.accounts.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
+    val currency by viewModel.currency.collectAsState()
     val thisMonthExpenses by viewModel.thisMonthExpenses.collectAsState()
     val recentExpenses by viewModel.recentExpenses.collectAsState()
 
@@ -191,12 +192,14 @@ fun HomePage(
             ) {
                 Homepage_totalBalance(
                     amount = totalBalance.toInt(),
+                    currency = currency,
                     modifier = Modifier
                         .weight(1f)
                         .height(85.dp)
                 )
                 Homepage_thisMonth(
                     amount = thisMonthExpenses.toInt(),
+                    currency = currency,
                     modifier = Modifier
                         .weight(1f)
                         .height(85.dp)
@@ -247,8 +250,8 @@ fun HomePage(
 @Composable
 fun Homepage_totalBalance(
     modifier: Modifier = Modifier,
-    currency: String = "$",
-    amount: Int = 8450
+    currency: String,
+    amount: Int
 ) {
     Card(
         modifier = modifier,
@@ -269,6 +272,7 @@ fun Homepage_totalBalance(
                 Text(
                     text = currency
                 )
+                Spacer(modifier = Modifier.padding(1.dp))
                 Text(
                     text = amount.toString()
                 )
@@ -280,8 +284,8 @@ fun Homepage_totalBalance(
 @Composable
 fun Homepage_thisMonth(
     modifier: Modifier = Modifier,
-    currency: String = "$",
-    amount: Int = 2900
+    currency: String,
+    amount: Int
 ) {
     Card(
         modifier = modifier,
@@ -299,6 +303,7 @@ fun Homepage_thisMonth(
             }
             Row {
                 Text(text = currency)
+                Spacer(modifier = Modifier.padding(1.dp))
                 Text(text = amount.toString())
             }
         }

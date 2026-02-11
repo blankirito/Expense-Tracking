@@ -27,7 +27,9 @@ import com.example.expense_tracking.ui.components.Editdatefield
 import com.example.expense_tracking.ui.components.Editdescriptionfield
 import com.example.expense_tracking.ui.components.*
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
+import com.example.expense_tracking.viewmodel.BudgetViewModel
 import com.google.firebase.auth.FirebaseAuth
+import java.util.Calendar
 
 @Composable
 fun AddPage(
@@ -239,8 +241,25 @@ fun Addpage_ExpenseDetail(
             Button(
                 onClick = {
                     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
-                    viewModel.saveExpense(userId = currentUserId) {
-                        Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
+
+                    try {
+                        val parts = viewModel.date.split("-")
+                        if (parts.size == 3) {
+
+                            viewModel.saveExpense(
+                                userId = currentUserId,
+                                onSuccess = {
+                                    Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                                    // ⚡ 触发 BudgetPage 刷新
+                                    BudgetViewModel().loadUserData(currentUserId)
+                                },
+                                onError = { e ->
+                                    Toast.makeText(context, "Error saving expense: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            )
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Invalid date format", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),

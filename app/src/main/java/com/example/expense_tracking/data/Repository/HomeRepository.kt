@@ -25,6 +25,21 @@ class HomeRepository {
         }
     }
 
+    suspend fun getUserAccountCurrency(userId: String): List<String> {
+        return try {
+            val snapshot = firestore.collection("accounts")
+                .whereEqualTo("user_id", userId)
+                .get()
+                .await()
+            snapshot.documents
+                .mapNotNull { it.getString("currency") }
+                .distinct()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
+
     suspend fun getUserThisMonthExpensesForAllAccounts(userId: String): Double {
         return try {
             val cal = Calendar.getInstance()

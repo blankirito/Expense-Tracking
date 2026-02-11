@@ -119,7 +119,13 @@ fun MainScaffold(currentUserId: String?) {
             }
             ExpenseTrackingScreen.Add -> AddPage(modifier)
             ExpenseTrackingScreen.Scan -> ScanPage(modifier)
-            ExpenseTrackingScreen.Budget -> BudgetPage(modifier)
+            ExpenseTrackingScreen.Budget -> {
+                if (currentUserId != null) {
+                    BudgetPage(userId = currentUserId)
+                } else {
+                    Text("Loading user info...")
+                }
+            }
             ExpenseTrackingScreen.Profile -> ProfilePage(modifier)
         }
     }
