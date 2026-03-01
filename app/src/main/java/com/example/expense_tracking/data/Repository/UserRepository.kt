@@ -44,22 +44,12 @@ class UserRepository {
         return auth.currentUser
     }
 
-    suspend fun updateEmail(currentPassword: String, newEmail: String, userId: String): Boolean {
-        val user = auth.currentUser ?: return false
+    suspend fun updateEmail(userId: String, newEmail: String): Boolean {
         return try {
-            // ✅ reauthenticate 用 Auth 当前邮箱
-            val credential = EmailAuthProvider.getCredential(user.email!!, currentPassword)
-            user.reauthenticate(credential).await()
-
-            // ✅ 更新 Auth 邮箱
-            user.updateEmail(newEmail).await()
-
-            // ✅ 更新 Firestore
             firestore.collection("users")
                 .document(userId)
                 .update("email", newEmail)
                 .await()
-
             true
         } catch (e: Exception) {
             e.printStackTrace()

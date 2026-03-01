@@ -1,5 +1,9 @@
 package com.example.expense_tracking.ui
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -33,6 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
+import android.net.Uri
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import com.example.expense_tracking.data.UiState.ReceiptData
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.text.TextRecognition
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 
 @Composable
 fun ScanPage(
@@ -40,8 +57,44 @@ fun ScanPage(
 ) {
 
     var selectedTab by remember { mutableStateOf("Scan") }
-
     val backgroundColor = Color(0xFFE6F0FA)
+
+    var recognizedText by remember { mutableStateOf("") }
+    var receiptData by remember { mutableStateOf(ReceiptData()) }
+
+    val context = LocalContext.current
+    var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
+
+    fun runOcr(bitmap: Bitmap) {
+
+        val image = InputImage.fromBitmap(bitmap, 0)
+
+        val recognizer = TextRecognition.getClient(
+            TextRecognizerOptions.DEFAULT_OPTIONS
+        )
+
+        recognizer.process(image)
+            .addOnSuccessListener { visionText ->
+                recognizedText = visionText.text
+                receiptData = parseReceipt(visionText.text)
+            }
+            .addOnFailureListener { e ->
+                recognizedText = "OCR Failed: ${e.message}"
+            }
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = GetContent()
+    ) { uri: Uri? ->
+
+        uri?.let {
+            val inputStream = context.contentResolver.openInputStream(it)
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+            selectedBitmap = bitmap
+            runOcr(bitmap)
+        }
+    }
 
     Scaffold(
         containerColor = backgroundColor,
@@ -142,6 +195,7 @@ fun ScanPage(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
         ) {
             Row {
                 // icons
@@ -150,13 +204,16 @@ fun ScanPage(
                         .padding(16.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.scan_receipt)
+                        text = stringResource(R.string.scan_receipt),
+                        fontSize = 25.sp,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                     )
                     Spacer(
                         modifier = Modifier.padding(4.dp)
                     )
                     Text(
-                        text = stringResource(R.string.scan_receipt_intro)
+                        text = stringResource(R.string.scan_receipt_intro),
+                        color = Color(0xFF424242)
                     )
                     Spacer(
                         modifier = Modifier.padding(4.dp)
@@ -164,13 +221,52 @@ fun ScanPage(
                     Scanpage_CameraPreview(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(400.dp)
+                            .height(400.dp),
+                        bitmap = selectedBitmap
                     )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+
+                            @Composable
+                            fun RowItem(label: String, value: String) {
+                                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Text(
+                                        text = "$label:",
+                                        modifier = Modifier.weight(1f),
+                                        fontSize = 14.sp,
+                                        color = Color(0xFF1E4EA0),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = value,
+                                        modifier = Modifier.weight(2f),
+                                        fontSize = 14.sp,
+                                        color = Color.Black
+                                    )
+                                }
+                                Spacer(modifier = Modifier.height(4.dp))
+                            }
+
+                            RowItem("Reference", receiptData.reference)
+                            RowItem("Amount", receiptData.amount)
+                            RowItem("Date", receiptData.date)
+                        }
+                    }
+
                     Spacer(
                         modifier = Modifier.padding(4.dp)
                     )
+
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = {  },
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth(),
@@ -188,7 +284,7 @@ fun ScanPage(
                         modifier = Modifier.padding(4.dp)
                     )
                     Button(
-                        onClick = { /*TODO*/ },
+                        onClick = { galleryLauncher.launch("image/*") },
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth(),
@@ -215,19 +311,57 @@ fun ScanPage(
     }
 }
 
+fun parseReceipt(ocrText: String): ReceiptData {
+    val lines = ocrText.lines()
+    var reference = ""
+    var amount = ""
+    var date = ""
+    val dateRegex = Regex("""\d{1,2} [A-Za-z]{3} \d{4}, \d{1,2}:\d{2} [AP]M""")
+
+    for (i in lines.indices) {
+        val line = lines[i].trim()
+
+        if (line.contains("Reference", ignoreCase = true) || line.contains("Recipient", ignoreCase = true)) {
+            if (i + 1 < lines.size) reference = lines[i + 1].trim()
+        }
+
+        if (line.contains("Amount", ignoreCase = true)) {
+            if (i + 1 < lines.size) amount = lines[i + 1].trim()
+        }
+
+        val match = dateRegex.find(line)
+        if (match != null) date = match.value
+    }
+
+    return ReceiptData(reference, amount, date)
+}
+
 @Composable
 fun Scanpage_CameraPreview(
     modifier: Modifier = Modifier,
+    bitmap: Bitmap?
 ) {
-    Card (
+    Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
-        Text(
-            text = "camera preview"
-        )
+
+        if (bitmap != null) {
+            Image(
+                bitmap = bitmap.asImageBitmap(),
+                contentDescription = "Selected Image",
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "camera preview")
+            }
+        }
     }
 }
 

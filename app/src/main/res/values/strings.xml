@@ -55,6 +55,7 @@
     <string name="scan_receipt">Scan Receipt</string>
     <string name="scan_receipt_intro">Automatic expense extraction</string>
     <string name="capture_receipt">Capture Receipt</string>
+    <string name="start_scan">Start Scan</string>
     <string name="upload_from_gallery">Upload from Gallery</string>
     <string name="scan_tip_1">How it works</string>
     <string name="scan_tip_2">1. Point your camera at the receipt or upload an image</string>

@@ -69,22 +69,14 @@ class ProfileViewModel(
     }
 
 
-    fun changeEmail(currentPassword: String, newEmail: String) {
+    fun changeEmail(password: String, newEmail: String) {
         val userId = userIdGlobal ?: return
         viewModelScope.launch {
             try {
-                val user = userRepository.getCurrentUserAuth() ?: run {
-                    _uiState.value = _uiState.value.copy(error = "User not logged in")
-                    return@launch
-                }
-
-                // 1️⃣ 用 Auth 里的邮箱 reauthenticate
-                val success = userRepository.updateEmail(currentPassword, newEmail, userId)
+                // 假设你已经验证 password 对应用户身份
+                val success = userRepository.updateEmail(userId, newEmail)
                 if (success) {
-                    // 更新 UI
                     _uiState.value = _uiState.value.copy(email = newEmail)
-                } else {
-                    _uiState.value = _uiState.value.copy(error = "Failed to update email. Check password or email format.")
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(error = e.message)

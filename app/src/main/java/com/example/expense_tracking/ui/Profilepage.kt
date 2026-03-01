@@ -560,7 +560,15 @@ fun Profilepage_Security(
             }
         }
     }
-
+    if (showChangeEmailDialog) {
+        ChangeEmailDialog(
+            onConfirm = { password, newEmail ->
+                viewModel.changeEmail(password, newEmail)
+                showChangeEmailDialog = false
+            },
+            onDismiss = { showChangeEmailDialog = false }
+        )
+    }
     if (showChangePasswordDialog) {
         ChangePasswordDialog(
             onConfirm = { oldPassword, newPassword ->
@@ -571,15 +579,7 @@ fun Profilepage_Security(
         )
     }
 
-    if (showChangeEmailDialog) {
-        ChangeEmailDialog(
-            onConfirm = { currentPassword, newEmail ->
-                viewModel.changeEmail(currentPassword, newEmail)
-                showChangeEmailDialog = false
-            },
-            onDismiss = { showChangeEmailDialog = false }
-        )
-    }
+
 }
 
 

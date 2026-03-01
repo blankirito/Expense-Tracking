@@ -364,41 +364,41 @@ fun EditProfileDialog(
 
 @Composable
 fun ChangeEmailDialog(
-    onConfirm: (String, String) -> Unit,
+    onConfirm: (String, String) -> Unit, // oldPassword, newEmail
     onDismiss: () -> Unit
 ) {
+    var password by remember { mutableStateOf("") }
     var newEmail by remember { mutableStateOf("") }
-    var currentPassword by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Change Email") },
         text = {
             Column {
-                OutlinedTextField(
+                TextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Current Password") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
                     value = newEmail,
                     onValueChange = { newEmail = it },
                     label = { Text("New Email") },
-                    singleLine = true
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = currentPassword,
-                    onValueChange = { currentPassword = it },
-                    label = { Text("Current Password") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(currentPassword, newEmail) }) { Text("Save") }
+            Button(onClick = { onConfirm(password, newEmail) }) { Text("Save") }
         },
         dismissButton = {
             Button(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }
+
 
 @Composable
 fun ChangePasswordDialog(

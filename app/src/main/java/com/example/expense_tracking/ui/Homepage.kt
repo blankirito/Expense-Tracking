@@ -190,14 +190,17 @@ fun HomePage(
                 text = stringResource(R.string.welcome_back),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp)
+                    .padding(start = 16.dp),
+                fontSize = 25.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = stringResource(R.string.homepage_intro),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp)
+                    .padding(start = 16.dp),
+                color = Color(0xFF424242)
             )
             Spacer(modifier = Modifier.height(8.dp))
 

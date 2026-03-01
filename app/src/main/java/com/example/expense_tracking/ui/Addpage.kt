@@ -128,11 +128,14 @@ fun AddPage(
 
             Text(
                 text = stringResource(R.string.add_expense),
-                fontSize = 20.sp
+                fontSize = 25.sp,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = stringResource(R.string.add_expense_intro),
-                color = Color(0xFF424242))
+            Text(
+                text = stringResource(R.string.add_expense_intro),
+                color = Color(0xFF424242)
+            )
             Spacer(modifier = Modifier.height(12.dp))
 
             Addpage_ExpenseDetail(
