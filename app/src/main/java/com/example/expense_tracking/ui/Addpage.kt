@@ -29,6 +29,7 @@ import com.example.expense_tracking.ui.components.*
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 import com.example.expense_tracking.viewmodel.BudgetViewModel
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
 
 @Composable
@@ -40,11 +41,13 @@ fun AddPage(
 
     val backgroundColor = Color(0xFFE6F0FA)
 
-    var currency by remember { mutableStateOf("") }
-    var amount by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    // ⚡ 拉取 Firestore categories
+    LaunchedEffect(Unit) {
+        viewModel.loadUserCategories(currentUserId, FirebaseFirestore.getInstance())
+    }
 
     Scaffold(
         containerColor = backgroundColor,
@@ -173,18 +176,6 @@ fun Addpage_ExpenseDetail(
             )
             Spacer(
                 modifier = Modifier.height(12.dp)
-            )
-            Text(
-                text = stringResource(R.string.currency),
-                fontWeight = Bold
-            )
-            EditCurrencyfield(
-                value = viewModel.currency,
-                onValueChange = { viewModel.onCurrencyChange(it) },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(
-                modifier = Modifier.height(16.dp)
             )
             Text(
                 text = stringResource(R.string.wallet),

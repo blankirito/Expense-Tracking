@@ -202,7 +202,7 @@ fun BudgetPage(
                 currency = currency,
                 modifier = Modifier
                     .fillMaxWidth()
-            )
+            )/*
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )
@@ -263,8 +263,7 @@ fun BudgetPage(
                         }
                     }
                 )
-            }
-
+            }*/
             Spacer(
                 modifier = Modifier.padding(8.dp)
             )

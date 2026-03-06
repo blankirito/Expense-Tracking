@@ -316,7 +316,7 @@ fun parseReceipt(ocrText: String): ReceiptData {
     var reference = ""
     var amount = ""
     var date = ""
-    val dateRegex = Regex("""\d{1,2} [A-Za-z]{3} \d{4}, \d{1,2}:\d{2} [AP]M""")
+    val dateRegex = Regex("""\d{1,2} [A-Za-z]{3} \d{4}""")
 
     for (i in lines.indices) {
         val line = lines[i].trim()

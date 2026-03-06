@@ -1,12 +1,9 @@
 package com.example.expense_tracking.data.Repository
 
 import android.net.Uri
+import com.example.expense_tracking.data.UiState.ReceiptData
+import com.google.firebase.firestore.FirebaseFirestore
 
-class ScanRepository {
+class ReceiptRepository(private val db: FirebaseFirestore) {
 
-    fun ScanImage(
-        imageUri: Uri,
-        onComplete: (String?) -> Unit
-
-    ) {}
 }

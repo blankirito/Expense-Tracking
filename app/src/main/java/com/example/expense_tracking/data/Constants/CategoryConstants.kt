@@ -13,11 +13,11 @@ object CategoryConstants {
     const val HEALTH = "Health"
     const val OTHERS = "Others"
 
-    val CATEGORIES = listOf(FOOD, TRANSPORT, SHOPPING, BILLS, ENTERTAINMENT, HEALTH, OTHERS)
+    val USER_CATEGORY_ICONS = mutableMapOf<String, String>()
 
-    @SuppressLint("SupportAnnotationUsage")
-    @DrawableRes
-    val CATEGORY_ICONS = mapOf(
+    val CATEGORIES = mutableListOf(FOOD, TRANSPORT, SHOPPING, BILLS, ENTERTAINMENT, HEALTH, OTHERS)
+
+    val CATEGORY_ICONS = mutableMapOf(
         FOOD to R.drawable.restaurant_24dp_e3e3e3_fill0_wght400_grad0_opsz24,
         TRANSPORT to R.drawable.transportation_24dp_e3e3e3_fill0_wght400_grad0_opsz24,
         SHOPPING to R.drawable.shopping_bag_24dp_e3e3e3_fill0_wght400_grad0_opsz24,
@@ -26,4 +26,6 @@ object CategoryConstants {
         HEALTH to R.drawable.health_and_safety_24dp_e3e3e3_fill0_wght400_grad0_opsz24,
         OTHERS to R.drawable.view_comfy_alt_24dp_e3e3e3_fill0_wght400_grad0_opsz24
     )
+
+
 }

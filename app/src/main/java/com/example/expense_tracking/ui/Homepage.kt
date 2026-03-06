@@ -649,7 +649,7 @@ fun Homepage_RecentTransactions(
             )
             recentExpenses.forEach { expense ->
                 Homepage_RecentTransaction_Record(
-                    currency = "MYR",
+                    currency = "RM",
                     total_cost = expense.price ?: 0.0,
                     date = expense.date ?: "N/A",
                     description = expense.description ?: "N/A",
@@ -671,19 +671,21 @@ fun Homepage_RecentTransaction_Record(
 ) {
     val iconColor = Color(0xFF64B5F6)
 
-    val iconRes = if (category != null && CategoryConstants.CATEGORY_ICONS.containsKey(category)) {
-        CategoryConstants.CATEGORY_ICONS[category]!!
-    } else {
-        CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
+    // ⚡ 优先用用户自定义 icon
+    val iconRes = when {
+        category == null -> CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
+        CategoryConstants.USER_CATEGORY_ICONS.containsKey(category) ->
+            CategoryConstants.CATEGORY_ICONS[CategoryConstants.USER_CATEGORY_ICONS[category]]!!
+        CategoryConstants.CATEGORY_ICONS.containsKey(category) ->
+            CategoryConstants.CATEGORY_ICONS[category]!!
+        else -> CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
     }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Row(
             modifier = Modifier.padding(10.dp),
@@ -697,29 +699,14 @@ fun Homepage_RecentTransaction_Record(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(
-                    text = description
-                )
-                Text(
-                    text = date,
-                    color = Color.Gray
-                )
+                Text(text = description)
+                Text(text = date, color = Color.Gray)
             }
             Spacer(modifier = Modifier.weight(1f))
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "-",
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = currency)
                 Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = currency,
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = total_cost.toString(),
-                )
+                Text(text = total_cost.toString())
             }
         }
     }

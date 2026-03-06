@@ -32,7 +32,7 @@ fun AppEntryPoint() {
     var isLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
 
     if (isLoggedIn) {
-        MainScaffold(currentUserId = auth.currentUser?.uid)
+        MainScaffold()
     } else {
         LoginRegisterWrapper(
             onLoginSuccess = { isLoggedIn = true }
@@ -102,13 +102,13 @@ fun AppRoot(
             )
         }
     } else {
-        MainScaffold(currentUserId)
+        MainScaffold()
     }
 }
 
 
 @Composable
-fun MainScaffold(currentUserId: String?) {
+fun MainScaffold() {
     var currentScreen by remember { mutableStateOf(ExpenseTrackingScreen.Home) }
 
     val navItems = listOf(
