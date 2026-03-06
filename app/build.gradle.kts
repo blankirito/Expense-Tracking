@@ -74,6 +74,7 @@ dependencies {
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
 
     implementation ("com.google.mlkit:text-recognition:16.0.0")
+    implementation("androidx.compose.material3:material3:1.3.1")
     //implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }

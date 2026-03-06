@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -46,7 +47,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.data.UiState.ReceiptData
+import com.example.expense_tracking.ui.components.EditCategoryField
+import com.example.expense_tracking.ui.components.ScanCategoryField
+import com.example.expense_tracking.viewmodel.ScanViewModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -55,6 +61,8 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 fun ScanPage(
     modifier: Modifier = Modifier
 ) {
+
+    val viewModel: ScanViewModel = viewModel()
 
     var selectedTab by remember { mutableStateOf("Scan") }
     val backgroundColor = Color(0xFFE6F0FA)
@@ -66,17 +74,20 @@ fun ScanPage(
     var selectedBitmap by remember { mutableStateOf<Bitmap?>(null) }
 
     fun runOcr(bitmap: Bitmap) {
-
         val image = InputImage.fromBitmap(bitmap, 0)
-
-        val recognizer = TextRecognition.getClient(
-            TextRecognizerOptions.DEFAULT_OPTIONS
-        )
+        val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
         recognizer.process(image)
             .addOnSuccessListener { visionText ->
+                val receipt = parseReceipt(visionText.text)
                 recognizedText = visionText.text
-                receiptData = parseReceipt(visionText.text)
+                receiptData = receipt
+
+                // 填充 ViewModel
+                viewModel.onAmountChange(receipt.amount)
+                viewModel.onDescriptionChange(receipt.reference)
+                // 转换日期格式，例如 "01 Mar 2026" -> "2026-03-01"
+                viewModel.onDateChange(parseDateToYMD(receipt.date))
             }
             .addOnFailureListener { e ->
                 recognizedText = "OCR Failed: ${e.message}"
@@ -264,9 +275,23 @@ fun ScanPage(
                     Spacer(
                         modifier = Modifier.padding(4.dp)
                     )
-
+                    ScanCategoryField(
+                        viewModel = viewModel,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                    Spacer(
+                        modifier = Modifier.padding(4.dp)
+                    )
                     Button(
-                        onClick = {  },
+                        onClick = {
+                            val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@Button
+                            viewModel.saveExpense(
+                                userId = currentUserId,
+                                onSuccess = { Toast.makeText(context, "Expense saved", Toast.LENGTH_SHORT).show() },
+                                onError = { e -> Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show() }
+                            )
+                        },
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
                             .fillMaxWidth(),
@@ -308,6 +333,17 @@ fun ScanPage(
                 }
             }
         }
+    }
+}
+
+fun parseDateToYMD(dateStr: String): String {
+    return try {
+        val inputFormat = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.ENGLISH)
+        val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ENGLISH)
+        val date = inputFormat.parse(dateStr)
+        outputFormat.format(date)
+    } catch (e: Exception) {
+        ""
     }
 }
 

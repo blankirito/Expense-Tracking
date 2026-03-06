@@ -2,6 +2,7 @@ package com.example.expense_tracking.ui.components
 
 import android.app.DatePickerDialog
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -31,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -54,6 +56,7 @@ import java.util.Calendar
 import com.example.expense_tracking.data.Constants.*
 import com.example.expense_tracking.data.model.Account
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
+import com.example.expense_tracking.viewmodel.ScanViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlin.collections.map
@@ -178,6 +181,140 @@ fun EditCategoryField(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        expanded = false
+                        if (option == "Add New Category") {
+                            showAddDialog = true
+                        } else {
+                            viewModel.onCategoryChange(option)
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    if (showAddDialog) {
+        AlertDialog(
+            onDismissRequest = { showAddDialog = false },
+            title = { Text("Add New Category") },
+            text = {
+                Column {
+                    TextField(
+                        value = newCategoryName,
+                        onValueChange = { newCategoryName = it },
+                        label = { Text("Category Name") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Choose Icon:")
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val icons = CategoryConstants.CATEGORY_ICONS.keys.toList()
+                    val chunkedIcons = icons.chunked(4)
+                    Column {
+                        chunkedIcons.forEach { rowIcons ->
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                rowIcons.forEach { key ->
+                                    val iconRes = CategoryConstants.CATEGORY_ICONS[key]!!
+                                    IconButton(
+                                        onClick = { selectedIcon = key },
+                                        modifier = Modifier.size(48.dp)
+                                            .then(
+                                                if (selectedIcon == key) Modifier.border(2.dp, Color.Blue, RoundedCornerShape(8.dp))
+                                                else Modifier
+                                            )
+                                    ) {
+                                        Icon(painterResource(iconRes), contentDescription = key, tint = Color(0xFF64B5F6))
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = {
+                    if (newCategoryName.isNotBlank()) {
+                        val iconResId = CategoryConstants.CATEGORY_ICONS[selectedIcon]
+                            ?: CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
+
+                        // ⚡ 新增 category 插入到第一个
+                        if (!CategoryConstants.CATEGORIES.contains(newCategoryName)) {
+                            CategoryConstants.CATEGORIES.add(0, newCategoryName)
+                            CategoryConstants.CATEGORY_ICONS[newCategoryName] = iconResId
+                            // ⚡ 用户自定义 category map
+                            CategoryConstants.USER_CATEGORY_ICONS[newCategoryName] = selectedIcon
+                        }
+
+                        val data = mapOf(
+                            "userId" to currentUserId,
+                            "name" to newCategoryName,
+                            "icon" to selectedIcon
+                        )
+                        firestore.collection("categories")
+                            .add(data)
+                            .addOnSuccessListener {
+                                viewModel.onCategoryChange(newCategoryName)
+                                showAddDialog = false
+                                newCategoryName = ""
+                            }
+                            .addOnFailureListener {
+                                Toast.makeText(context, "Error adding category", Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                }) { Text("Save") }
+            },
+            dismissButton = { Button(onClick = { showAddDialog = false }) { Text("Cancel") } }
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScanCategoryField(
+    viewModel: ScanViewModel,
+    modifier: Modifier = Modifier,
+    firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+) {
+    val context = LocalContext.current
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    var expanded by remember { mutableStateOf(false) }
+    var showAddDialog by remember { mutableStateOf(false) }
+    var newCategoryName by remember { mutableStateOf("") }
+    var selectedIcon by remember { mutableStateOf(CategoryConstants.FOOD) }
+
+    val options = CategoryConstants.CATEGORIES + "Add New Category"
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier.fillMaxWidth()
+    ) {
+        TextField(
+            value = viewModel.category,
+            onValueChange = { },
+            readOnly = true,
+            label = { Text("Category") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            modifier = Modifier.menuAnchor().fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(Color.White)
+                .padding(4.dp)
         ) {
             options.forEach { option ->
                 DropdownMenuItem(
