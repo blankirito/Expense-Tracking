@@ -33,6 +33,7 @@
     <string name="expenseSummary">Expense Summary</string>
     <string name="spendingPrediction">Spending Predictions</string>
     <string name="recentTransaction">Recent Transactions</string>
+    <string name="viewAll">View All Transaction</string>
 
     // Add Page
     <string name="add_expense">Add Expense</string>

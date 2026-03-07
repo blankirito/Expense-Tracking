@@ -5,6 +5,7 @@ import androidx.annotation.ColorRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,18 +23,28 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,14 +67,15 @@ import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracking.R
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.data.Constants.CategoryConstants
 import com.example.expense_tracking.data.model.Expense
 import com.example.expense_tracking.viewmodel.HomeViewModel
-import java.nio.file.Files.size
-import java.util.Map.entry
-
+import java.util.Calendar
 
 @Composable
 fun HomePage(
@@ -76,12 +88,13 @@ fun HomePage(
         viewModel.loadDailyExpenses(userId)
         viewModel.loadMonthlyCategoryExpenses(userId)
     }
-    val accounts by viewModel.accounts.collectAsState()
+
     val totalBalance by viewModel.totalBalance.collectAsState()
     val currency by viewModel.currency.collectAsState()
     val thisMonthExpenses by viewModel.thisMonthExpenses.collectAsState()
     val recentExpenses by viewModel.recentExpenses.collectAsState()
 
+    val navController = rememberNavController()
     var selectedTab by remember { mutableStateOf("Home") }
 
     val backgroundColor = Color(0xFFE6F0FA)
@@ -89,184 +102,101 @@ fun HomePage(
     Scaffold(
         containerColor = backgroundColor,
         bottomBar = {
-            NavigationBar(
-                containerColor = Color.White
-            ){
+            NavigationBar(containerColor = Color.White) {
                 NavigationBarItem(
-                    icon = {
-                        Icon(Icons.Filled.Home, contentDescription = "Home")
-                    },
+                    icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
                     label = { Text("Home") },
                     selected = selectedTab == "Home",
-                    onClick = { selectedTab = "Home" },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        unselectedIconColor = Color.Gray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Gray,
-                    )
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.add_circle_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Add"
-                        )
-                    },
-                    label = { Text("Add") },
-                    selected = selectedTab == "Add",
-                    onClick = { selectedTab = "Add" },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        unselectedIconColor = Color.Gray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Gray,
-                    )
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.photo_camera_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Scan"
-                        )
-                    },
-                    label = { Text("Scan") },
-                    selected = selectedTab == "Scan",
-                    onClick = { selectedTab = "Scan" },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        unselectedIconColor = Color.Gray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Gray,
-                    )
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.account_balance_wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Budget"
-                        )
-                    },
-                    label = { Text("Budget") },
-                    selected = selectedTab == "Budget",
-                    onClick = { selectedTab = "Budget" },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        unselectedIconColor = Color.Gray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Gray,
-                    )
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.person_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
-                            contentDescription = "Profile"
-                        )
-                    },
-                    label = { Text("Profile") },
-                    selected = selectedTab == "Profile",
-                    onClick = { selectedTab = "Profile" },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color.Black,
-                        unselectedIconColor = Color.Gray,
-                        selectedTextColor = Color.Black,
-                        unselectedTextColor = Color.Gray,
-                    )
+                    onClick = { selectedTab = "Home" }
                 )
             }
         }
     ) { innerPadding ->
 
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
+        NavHost(
+            navController = navController,
+            startDestination = "home_main",
+            modifier = Modifier.padding(innerPadding)
         ) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text( //Welcome, ${viewModel.currentUsername ?: "User"}
-                text = stringResource(R.string.welcome_back),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp),
-                fontSize = 25.sp,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.homepage_intro),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp),
-                color = Color(0xFF424242)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Homepage_totalBalance(
-                    amount = totalBalance.toInt(),
+            composable("home_main") {
+                HomeMainContent(
+                    totalBalance = totalBalance,
                     currency = currency,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(85.dp)
-                )
-                Homepage_thisMonth(
-                    amount = thisMonthExpenses.toInt(),
-                    currency = currency,
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(85.dp)
+                    thisMonthExpenses = thisMonthExpenses,
+                    recentExpenses = recentExpenses,
+                    onViewAllClick = { navController.navigate("all_transactions") },
+                    viewModel = viewModel
                 )
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Homepage_MonthlyTrends(
-                viewModel = viewModel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(horizontal = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Homepage_ExpenseSummary(
-                viewModel = viewModel,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    //。height(220.dp)
-                    .padding(horizontal = 16.dp)
-            )
-
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Homepage_SpendingPredictions(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(260.dp)
-                    .padding(horizontal = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Homepage_RecentTransactions(
-                recentExpenses = recentExpenses,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
+            composable("all_transactions") {
+                AllTransactionPage(
+                    allTransactionList = viewModel.allExpenses.collectAsState().value,
+                    onBackClick = { navController.popBackStack() }
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun HomeMainContent(
+    totalBalance: Double,
+    thisMonthExpenses: Double,
+    currency: String,
+    recentExpenses: List<Expense>,
+    viewModel: HomeViewModel,
+    onViewAllClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.welcome_back),
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(R.string.homepage_intro),
+            color = Color(0xFF424242)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Homepage_totalBalance(amount = totalBalance.toInt(), currency = currency, modifier = Modifier.weight(1f).height(85.dp))
+            Homepage_thisMonth(amount = thisMonthExpenses.toInt(), currency = currency, modifier = Modifier.weight(1f).height(85.dp))
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Homepage_MonthlyTrends(
+            modifier = Modifier.fillMaxWidth().height(200.dp),
+            viewModel = viewModel,
+            allExpenses = viewModel.allExpenses.collectAsState().value
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Homepage_ExpenseSummary(
+            modifier = Modifier.fillMaxWidth(),
+            viewModel = viewModel,
+            allExpenses = viewModel.allExpenses.collectAsState().value
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Homepage_SpendingPredictions(modifier = Modifier.fillMaxWidth().height(260.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Homepage_RecentTransactions(
+            recentExpenses = recentExpenses,
+            onViewAllClick = onViewAllClick,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -361,28 +291,128 @@ fun Homepage_thisMonth(
 @Composable
 fun Homepage_MonthlyTrends(
     viewModel: HomeViewModel,
+    allExpenses: List<Expense>,
     modifier: Modifier = Modifier
 ) {
-    val dailyExpense by viewModel.dailyExpenses.collectAsState()
+    // 下拉筛选状态
+    var selectedMonth by remember { mutableStateOf("All Month") }
+    var selectedYear by remember { mutableStateOf("All Year") }
+
+    val monthMap = mapOf(
+        "All Month" to "All Month",
+        "01" to "Jan", "02" to "Feb", "03" to "Mar", "04" to "Apr",
+        "05" to "May", "06" to "Jun", "07" to "Jul", "08" to "Aug",
+        "09" to "Sep", "10" to "Oct", "11" to "Nov", "12" to "Dec"
+    )
+    val months = monthMap.keys.toList()
+    val years = listOf("All Year") + allExpenses.mapNotNull { it.date?.split("-")?.getOrNull(0) }.distinct()
+
+    val filteredExpenses = allExpenses.filter { expense ->
+        val expenseMonth = expense.date?.split("-")?.getOrNull(1)?.padStart(2,'0') ?: "01"
+        val expenseYear = expense.date?.split("-")?.getOrNull(0) ?: "2000"
+
+        (selectedMonth == "All Month" || expenseMonth == selectedMonth) &&
+                (selectedYear == "All Year" || expenseYear == selectedYear)
+    }
+
+    val dailyTotals = remember(filteredExpenses) {
+        val cal = Calendar.getInstance()
+        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
+        val totals = MutableList(daysInMonth) { 0.0 }
+
+        filteredExpenses.forEach { expense ->
+            expense.date?.split("-")?.getOrNull(2)?.toIntOrNull()?.let { day ->
+                if (day in 1..daysInMonth) totals[day - 1] += expense.price ?: 0.0
+            }
+        }
+        totals
+    }
 
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column {
-            Text(
-                text = stringResource(R.string.monthlyTrend),
-                modifier = Modifier.padding(start = 20.dp, top = 16.dp)
-            )
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+
+            // 标题 + 筛选在同一行
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Title
+                Text(
+                    text = stringResource(R.string.monthlyTrend),
+                    fontSize = 18.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // 筛选按钮
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Month Dropdown
+                    var monthExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        modifier = Modifier
+                            .clickable { monthExpanded = true }
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF5F5F5)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(monthMap[selectedMonth] ?: selectedMonth, fontSize = 14.sp)
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = monthExpanded, onDismissRequest = { monthExpanded = false }) {
+                        months.forEach { month ->
+                            DropdownMenuItem(
+                                text = { Text(monthMap[month] ?: month) },
+                                onClick = {
+                                    selectedMonth = month
+                                    monthExpanded = false
+                                }
+                            )
+                        }
+                    }
+
+                    // Year Dropdown
+                    var yearExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        modifier = Modifier
+                            .clickable { yearExpanded = true }
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF5F5F5)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(selectedYear, fontSize = 14.sp) // 直接显示年份
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = yearExpanded, onDismissRequest = { yearExpanded = false }) {
+                        years.forEach { year ->
+                            DropdownMenuItem(
+                                text = { Text(year) },
+                                onClick = {
+                                    selectedYear = year
+                                    yearExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Chart 保留在 Column 下方
             MonthlyTrendsChart(
-                expensesByDay = dailyExpense,
+                expensesByDay = dailyTotals,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
             )
         }
     }
@@ -492,26 +522,115 @@ fun MonthlyTrendsChart(
 @Composable
 fun Homepage_ExpenseSummary(
     viewModel: HomeViewModel,
+    allExpenses: List<Expense>,
     modifier: Modifier = Modifier
 ) {
-    val categoryExpenses by viewModel.monthlyCategoryExpenses.collectAsState()
+    var selectedMonth by remember { mutableStateOf("All Month") }
+    var selectedYear by remember { mutableStateOf("All Year") }
+
+    val monthMap = mapOf(
+        "All Month" to "All Month",
+        "01" to "Jan", "02" to "Feb", "03" to "Mar", "04" to "Apr",
+        "05" to "May", "06" to "Jun", "07" to "Jul", "08" to "Aug",
+        "09" to "Sep", "10" to "Oct", "11" to "Nov", "12" to "Dec"
+    )
+    val months = monthMap.keys.toList()
+    val years = listOf("All Year") + allExpenses.mapNotNull { it.date?.split("-")?.getOrNull(0) }.distinct()
+
+    // 过滤数据
+    val filteredExpenses = allExpenses.filter { expense ->
+        val expenseMonth = expense.date?.split("-")?.getOrNull(1)?.padStart(2,'0') ?: "01"
+        val expenseYear = expense.date?.split("-")?.getOrNull(0) ?: "2000"
+
+        (selectedMonth == "All Month" || expenseMonth == selectedMonth) &&
+                (selectedYear == "All Year" || expenseYear == selectedYear)
+    }
+
+    val categoryExpenses = filteredExpenses.groupBy { it.category ?: "Others" }
+        .mapValues { (_, expenses) -> expenses.sumOf { it.price ?: 0.0 } }
+
     val currency by viewModel.currency.collectAsState()
 
     Card(
         modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.expenseSummary),
-                modifier = Modifier.padding(start = 8.dp)
-            )
+
+            // 标题 + 筛选在同一行
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Title
+                Text(
+                    text = stringResource(R.string.expenseSummary),
+                    fontSize = 18.sp,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // 筛选按钮
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Month Dropdown
+                    var monthExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        modifier = Modifier
+                            .clickable { monthExpanded = true }
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF5F5F5)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(monthMap[selectedMonth] ?: selectedMonth, fontSize = 14.sp)
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = monthExpanded, onDismissRequest = { monthExpanded = false }) {
+                        months.forEach { month ->
+                            DropdownMenuItem(
+                                text = { Text(monthMap[month] ?: month) },
+                                onClick = {
+                                    selectedMonth = month
+                                    monthExpanded = false
+                                }
+                            )
+                        }
+                    }
+
+                    // Year Dropdown
+                    var yearExpanded by remember { mutableStateOf(false) }
+                    Surface(
+                        modifier = Modifier
+                            .clickable { yearExpanded = true }
+                            .border(1.dp, Color.Gray, RoundedCornerShape(12.dp))
+                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color(0xFFF5F5F5)
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(selectedYear, fontSize = 14.sp) // 直接显示年份
+                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+                        }
+                    }
+                    DropdownMenu(expanded = yearExpanded, onDismissRequest = { yearExpanded = false }) {
+                        years.forEach { year ->
+                            DropdownMenuItem(
+                                text = { Text(year) },
+                                onClick = {
+                                    selectedYear = year
+                                    yearExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-
+            // 饼图 / ExpenseSummary 保留在 Column 下方
             if (categoryExpenses.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -626,27 +745,25 @@ fun Homepage_SpendingPredictions(modifier: Modifier = Modifier) {
 @Composable
 fun Homepage_RecentTransactions(
     recentExpenses: List<Expense>,
+    onViewAllClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        )
+        colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(10.dp)
-        ) {
-            Spacer(
-                modifier = Modifier.padding(4.dp)
-            )
-            Text(
-                text = stringResource(R.string.recentTransaction),
-                modifier = modifier.padding(start = 1.dp)
-            )
-            Spacer(
-                modifier = Modifier.padding(8.dp)
-            )
+        Column(modifier = Modifier.fillMaxWidth().padding(10.dp)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.recentTransaction),
+                    modifier = modifier.weight(1f).padding(12.dp)
+                )
+                TextButton(onClick = onViewAllClick) {
+                    Text("View All")
+                    Icon(Icons.Default.KeyboardArrowRight, contentDescription = null)
+                }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
             recentExpenses.forEach { expense ->
                 Homepage_RecentTransaction_Record(
                     currency = "RM",
@@ -671,7 +788,6 @@ fun Homepage_RecentTransaction_Record(
 ) {
     val iconColor = Color(0xFF64B5F6)
 
-    // ⚡ 优先用用户自定义 icon
     val iconRes = when {
         category == null -> CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
         CategoryConstants.USER_CATEGORY_ICONS.containsKey(category) ->

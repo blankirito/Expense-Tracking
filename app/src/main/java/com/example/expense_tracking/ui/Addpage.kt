@@ -21,7 +21,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
 import com.example.expense_tracking.data.model.*
-import com.example.expense_tracking.ui.components.EditCurrencyfield
 import com.example.expense_tracking.ui.components.Editamountfield
 import com.example.expense_tracking.ui.components.Editdatefield
 import com.example.expense_tracking.ui.components.Editdescriptionfield
@@ -270,7 +269,7 @@ fun Addpage_ExpenseDetail(
                     containerColor = Color(0xFF1565C0),
                     contentColor = Color.White
                 ),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(8.dp),
             ) {
                 Text(
                     text = stringResource(R.string.save_expense)

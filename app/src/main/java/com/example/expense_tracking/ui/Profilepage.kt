@@ -52,7 +52,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
 import com.example.expense_tracking.data.UiState.ProfileUiState
-import com.example.expense_tracking.ui.components.ChangeEmailDialog
 import com.example.expense_tracking.ui.components.ChangePasswordDialog
 import com.example.expense_tracking.ui.components.EditProfileDialog
 import com.example.expense_tracking.viewmodel.ProfileViewModel
@@ -183,7 +182,7 @@ fun ProfilePage(
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.padding(8.dp))
-            Profilepage_Preferences(modifier = Modifier.fillMaxWidth())
+            //Profilepage_Preferences(modifier = Modifier.fillMaxWidth())
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
@@ -367,25 +366,6 @@ fun Profilepage_WalletDetail(
         ) {
             Text(text = stringResource(R.string.wallet_detail))
             Spacer(modifier = Modifier.padding(12.dp))
-            Text(text = stringResource(R.string.currency), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.padding(2.dp))
-            Card(
-                modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(8.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = uistate.currency)
-                }
-            }
-            Spacer(
-                modifier = Modifier.padding(8.dp)
-            )
             Text(text = stringResource(R.string.cash), fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.padding(2.dp))
             Card(
@@ -545,29 +525,7 @@ fun Profilepage_Security(
             }
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            Button(
-                onClick = { showChangeEmailDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0x80FFFFFF),
-                    contentColor = Color.Black
-                ),
-                border = BorderStroke(0.5.dp, Color.Gray)
-            ) {
-                Text(text = stringResource(R.string.change_email))
-            }
         }
-    }
-    if (showChangeEmailDialog) {
-        ChangeEmailDialog(
-            onConfirm = { password, newEmail ->
-                viewModel.changeEmail(password, newEmail)
-                showChangeEmailDialog = false
-            },
-            onDismiss = { showChangeEmailDialog = false }
-        )
     }
     if (showChangePasswordDialog) {
         ChangePasswordDialog(
@@ -582,7 +540,7 @@ fun Profilepage_Security(
 
 }
 
-
+/*
 @Composable
 fun Profilepage_Preferences(
     modifier: Modifier = Modifier,
@@ -649,7 +607,7 @@ fun Profilepage_Preferences(
             }
         }
     }
-}
+}*/
 
 @Preview(showBackground = true)
 @Composable

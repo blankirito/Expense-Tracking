@@ -478,38 +478,6 @@ fun Editdescriptionfield(
     )
 }
 
-@Composable
-fun EditCurrencyfield(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        value = value,
-        singleLine = true,
-        modifier = modifier,
-        onValueChange = onValueChange,
-        label = { Text(stringResource(R.string.example_currency)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
-    )
-}
-
-@Composable
-fun EditPhoneField(
-    modifier: Modifier = Modifier,
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    TextField(
-        value = value,
-        singleLine = true,
-        modifier = Modifier,
-        onValueChange = onValueChange ,
-        label = { Text(stringResource(R.string.example_phone_num)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletDropDown(
@@ -592,7 +560,10 @@ fun EditProfileDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onConfirm(name, phone) }) {
+            Button(
+                onClick = { onConfirm(name, phone) },
+                enabled = name.isNotBlank() && phone.isNotBlank()
+            ) {
                 Text("Save")
             }
         },
@@ -600,44 +571,6 @@ fun EditProfileDialog(
             Button(onClick = onDismiss) {
                 Text("Cancel")
             }
-        }
-    )
-}
-
-
-@Composable
-fun ChangeEmailDialog(
-    onConfirm: (String, String) -> Unit, // oldPassword, newEmail
-    onDismiss: () -> Unit
-) {
-    var password by remember { mutableStateOf("") }
-    var newEmail by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Change Email") },
-        text = {
-            Column {
-                TextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text("Current Password") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
-                    value = newEmail,
-                    onValueChange = { newEmail = it },
-                    label = { Text("New Email") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = { onConfirm(password, newEmail) }) { Text("Save") }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) { Text("Cancel") }
         }
     )
 }

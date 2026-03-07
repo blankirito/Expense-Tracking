@@ -38,6 +38,9 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
     private val _monthlyCategoryExpenses = MutableStateFlow<Map<String, Double>>(emptyMap())
     val monthlyCategoryExpenses: StateFlow<Map<String, Double>> = _monthlyCategoryExpenses
 
+    private val _allExpenses = MutableStateFlow<List<Expense>>(emptyList())
+    val allExpenses: StateFlow<List<Expense>> = _allExpenses
+
     private var currentUserId: String = ""
 
     fun loadUserData(userId: String) {
@@ -87,10 +90,17 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
             .addSnapshotListener { snapshot, _ ->
                 if(snapshot != null){
                     val expenses = snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
+
+                    // 本月总支出
                     _thisMonthExpenses.value = expenses
                         .filter { it.date?.startsWith(yearMonth) == true }
                         .sumOf { it.price ?: 0.0 }
+
+                    // Recent Transactions 只显示 4 条
                     _recentExpenses.value = expenses.sortedByDescending { it.date }.take(4)
+
+                    // All Transactions 显示全部
+                    _allExpenses.value = expenses.sortedByDescending { it.date }
                 }
             }
     }

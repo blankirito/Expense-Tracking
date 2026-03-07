@@ -290,7 +290,7 @@ fun BudgetPage(
         ) {
             Row {
                 Icon(
-                    painter =painterResource(R.drawable.wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
+                    painter = painterResource(R.drawable.wallet_24dp_e3e3e3_fill0_wght400_grad0_opsz24),
                     contentDescription = "null",
                     modifier = Modifier
                 )
@@ -381,7 +381,8 @@ fun Budgetpage_CategoryBudgets(
                 },
                 onDeleteCategory = { catToDelete ->
                     viewModel.deleteCategory(catToDelete)
-                }            )
+                }
+            )
             Spacer(modifier = Modifier.padding(8.dp))
         }
     }
