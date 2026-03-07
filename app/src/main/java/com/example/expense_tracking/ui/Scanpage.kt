@@ -395,7 +395,7 @@ fun Scanpage_CameraPreview(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "camera preview")
+                Text(text = "Selected picture will display at here")
             }
         }
     }

@@ -59,7 +59,7 @@
     <string name="start_scan">Start Scan</string>
     <string name="upload_from_gallery">Upload from Gallery</string>
     <string name="scan_tip_1">How it works</string>
-    <string name="scan_tip_2">1. Point your camera at the receipt or upload an image</string>
+    <string name="scan_tip_2">1. Upload an image</string>
     <string name="scan_tip_3">2. Our OCR technology extracts the data automatically</string>
     <string name="scan_tip_4">3. Review and confirms the extracted information</string>
     <string name="scan_tip_5">4. The expense is saved to your account</string>

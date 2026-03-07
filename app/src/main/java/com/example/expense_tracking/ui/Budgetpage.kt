@@ -1,5 +1,6 @@
 package com.example.expense_tracking.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -471,15 +472,17 @@ fun Budgetpage_CategoryBudgetItem(
             title = { Text(text = "Edit Category") },
             text = {
                 Column {
-                    androidx.compose.material3.OutlinedTextField(
+                    /*androidx.compose.material3.OutlinedTextField(
                         value = newCategory,
                         onValueChange = { newCategory = it },
                         label = { Text("Category Name") }
-                    )
+                    )*/
                     Spacer(modifier = Modifier.height(8.dp))
                     androidx.compose.material3.OutlinedTextField(
                         value = newLimit,
-                        onValueChange = { newLimit = it },
+                        onValueChange = { input ->
+                            newLimit = input.filter { it.isDigit() || it == '.' }
+                        },
                         label = { Text("Budget Limit") },
                         singleLine = true
                     )
@@ -488,7 +491,12 @@ fun Budgetpage_CategoryBudgetItem(
             confirmButton = {
                 Button(
                     onClick = {
-                        val parsedLimit = newLimit.toDoubleOrNull() ?: limit
+                        val parsedLimit = newLimit.toDoubleOrNull() ?: -1.0
+                        if (parsedLimit <= 0) {
+                            val context = null
+                            Toast.makeText(context, "Budget limit must be positive", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                         onEditCategory(newCategory, parsedLimit)
                         showDialog = false
                     }
