@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -60,6 +61,18 @@ class HomeViewModel(
 
     private val _predictionMax = MutableStateFlow(0.0)
     val predictionMax: StateFlow<Double> = _predictionMax
+
+    private val _predictionConfidence =
+        MutableStateFlow(0)
+
+    val predictionConfidence =
+        _predictionConfidence.asStateFlow()
+
+    private val _predictionTrend =
+        MutableStateFlow("Stable")
+
+    val predictionTrend =
+        _predictionTrend.asStateFlow()
 
     // ---------------- FIRESTORE ----------------
 
@@ -281,8 +294,9 @@ class HomeViewModel(
             SimpleDateFormat("yyyy-MM", Locale.US)
                 .format(Date())
 
+        // FIX 1: exclude current AND future months
         val filtered =
-            monthlyTotals.filterKeys { it != currentMonth }
+            monthlyTotals.filterKeys { it < currentMonth }
 
         val sorted =
             filtered.keys.sorted()
@@ -322,13 +336,26 @@ class HomeViewModel(
                 (n * sumXY - sumX * sumY) /
                         denominator
 
+        // -------- Trend Detection --------
+
+        _predictionTrend.value =
+            when {
+                slope > 50 -> "Increasing ↑"
+                slope < -50 -> "Decreasing ↓"
+                else -> "Stable →"
+            }
+
         val intercept =
             (sumY - slope * sumX) / n
 
         val prediction =
             intercept + slope * (n + 1)
 
-        _predictedNextMonth.value = prediction
+        // FIX 2: prevent negative prediction
+        val safePrediction =
+            if (prediction < 0) 0.0 else prediction
+
+        _predictedNextMonth.value = safePrediction
 
         val chart = mutableListOf<Pair<String, Double>>()
 
@@ -342,14 +369,34 @@ class HomeViewModel(
             )
         }
 
-        chart.add(Pair("Predict", prediction))
+        chart.add(Pair("Predict", safePrediction))
 
         _predictionChartData.value = chart
 
-        val margin = prediction * 0.1
+        val margin = safePrediction * 0.1
 
-        _predictionMin.value = prediction - margin
-        _predictionMax.value = prediction + margin
+        _predictionMin.value = safePrediction - margin
+        _predictionMax.value = safePrediction + margin
+
+        // -------- Confidence Score --------
+
+        // variance calculation
+        val avg = values.map { it.second }.average()
+
+        val variance =
+            values.sumOf { (it.second - avg) * (it.second - avg) } / values.size
+
+        val stdDev = kotlin.math.sqrt(variance)
+
+        // smaller variance = higher confidence
+        val confidence =
+            if (avg == 0.0) 50
+            else
+                ((1 - (stdDev / avg)) * 100)
+                    .toInt()
+                    .coerceIn(0, 100)
+
+        _predictionConfidence.value = confidence
     }
 
     // ---------------- CLEAR LISTENERS ----------------

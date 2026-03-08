@@ -9,6 +9,8 @@ import com.example.expense_tracking.data.Repository.AddRepository
 import kotlinx.coroutines.launch
 import com.example.expense_tracking.data.Constants.*
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class AddExpenseViewModel(
     private val repository: AddRepository = AddRepository()
@@ -26,6 +28,12 @@ class AddExpenseViewModel(
         private set
     var description by mutableStateOf("")
         private set
+
+    private val _userCategories =
+        MutableStateFlow<List<String>>(emptyList())
+
+    val userCategories: StateFlow<List<String>> =
+        _userCategories
 
     fun onAccountSelected(accountId: String) { selectedAccountId = accountId }
     fun onAmountChange(value: String) { amount = value }
@@ -58,20 +66,33 @@ class AddExpenseViewModel(
         }
     }
 
-    fun loadUserCategories(userId: String, firestore: FirebaseFirestore) {
+    fun loadUserCategories(
+        userId: String,
+        firestore: FirebaseFirestore
+    ) {
+
         firestore.collection("categories")
             .whereEqualTo("userId", userId)
             .get()
             .addOnSuccessListener { snapshot ->
+
+                val userList = mutableListOf<String>()
+
                 for (doc in snapshot.documents) {
+
                     val name = doc.getString("name") ?: continue
-                    val iconKey = doc.getString("icon") ?: CategoryConstants.OTHERS
+                    val iconKey =
+                        doc.getString("icon") ?: CategoryConstants.OTHERS
+
+                    userList.add(name)
+
+                    CategoryConstants.USER_CATEGORY_ICONS[name] = iconKey
 
                     if (!CategoryConstants.CATEGORIES.contains(name)) {
                         CategoryConstants.CATEGORIES.add(name)
-                        CategoryConstants.USER_CATEGORY_ICONS[name] = iconKey
                     }
                 }
+                _userCategories.value = userList
             }
     }
 }

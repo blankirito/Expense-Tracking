@@ -30,6 +30,7 @@ import com.example.expense_tracking.data.model.Expense
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun AllTransactionPage(
@@ -43,6 +44,7 @@ fun AllTransactionPage(
 
     val viewModel: AddExpenseViewModel = viewModel()
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+    val userCategories by viewModel.userCategories.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.loadUserCategories(
@@ -52,7 +54,19 @@ fun AllTransactionPage(
     }
 
     val categories =
-        (listOf("All Category") + CategoryConstants.CATEGORIES).distinct()
+        remember(userCategories) {
+
+            buildList {
+
+                add("All Category")
+
+                addAll(CategoryConstants.CATEGORIES)
+
+                userCategories.forEach {
+                    if (!contains(it)) add(it)
+                }
+            }
+        }
 
     val monthMap = mapOf(
         "All Month" to "All Month",

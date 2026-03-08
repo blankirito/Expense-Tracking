@@ -43,7 +43,6 @@ fun AddPage(
     val context = LocalContext.current
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-    // ⚡ 拉取 Firestore categories
     LaunchedEffect(Unit) {
         viewModel.loadUserCategories(currentUserId, FirebaseFirestore.getInstance())
     }
