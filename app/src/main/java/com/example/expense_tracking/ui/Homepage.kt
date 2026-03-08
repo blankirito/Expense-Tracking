@@ -779,9 +779,14 @@ fun Homepage_ExpenseSummary(
 fun ExpenseSummary(
     expensesByCategory: Map<String, Double>,
     currency: String,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier
+) {
+
     if (expensesByCategory.isEmpty()) {
-        Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
             Text("No data yet", color = Color.Gray)
         }
         return
@@ -794,68 +799,83 @@ fun ExpenseSummary(
         Color(0xFF64B5F6),
         Color(0xFF90CAF9),
         Color(0xFFBBDEFB),
-
         Color(0xFF2E7D32),
         Color(0xFF43A047),
         Color(0xFF66BB6A),
-
         Color(0xFFF9A825),
         Color(0xFFFFB300),
-
         Color(0xFFE65100),
         Color(0xFFFB8C00),
-
         Color(0xFF6A1B9A),
         Color(0xFF8E24AA),
-
         Color(0xFF00897B)
     )
 
     val total = expensesByCategory.values.sum()
 
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(16.dp)
     ) {
-        Canvas(modifier = Modifier.size(120.dp)) {
-            var startAngle = -90f
-            expensesByCategory.entries.forEachIndexed { index, entry ->
-                val sweep = (entry.value / total * 360).toFloat()
-                drawArc(
-                    color = colors[index % colors.size],
-                    startAngle = startAngle,
-                    sweepAngle = sweep,
-                    useCenter = true
-                )
-                startAngle += sweep
+
+        // ---------- PIE CHART ----------
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.size(180.dp)) {
+
+                var startAngle = -90f
+
+                expensesByCategory.entries.forEachIndexed { index, entry ->
+
+                    val sweep = (entry.value / total * 360).toFloat()
+
+                    drawArc(
+                        color = colors[index % colors.size],
+                        startAngle = startAngle,
+                        sweepAngle = sweep,
+                        useCenter = true
+                    )
+
+                    startAngle += sweep
+                }
             }
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Column(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            expensesByCategory.entries.forEachIndexed { index, entry ->
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .background(colors[index % colors.size], shape = CircleShape)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("${entry.key}:" )
-                    Spacer(
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text("${currency}")
-                    Spacer(
-                        modifier = Modifier.width(1.dp)
-                    )
-                    Text(" ${entry.value}")
-                }
+        // ---------- CATEGORY LIST ----------
+        expensesByCategory.entries.forEachIndexed { index, entry ->
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                // Color indicator
+                Box(
+                    modifier = Modifier
+                        .size(14.dp)
+                        .background(
+                            colors[index % colors.size],
+                            shape = CircleShape
+                        )
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Category name
+                Text(
+                    text = entry.key,
+                    modifier = Modifier.weight(1f)
+                )
+
+                // Amount
+                Text("$currency ${entry.value}")
             }
         }
     }
@@ -888,7 +908,13 @@ fun Homepage_SpendingPredictions(
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold
             )
-
+            Spacer(
+                modifier = Modifier.height(12.dp)
+            )
+            if (chartData.isEmpty()) {
+                Text("Not enough data for prediction")
+                return@Card
+            }
             Spacer(modifier = Modifier.height(12.dp))
 
             PredictionBarChart(
@@ -936,6 +962,7 @@ fun Homepage_SpendingPredictions(
                 color = Color.Gray
             )
         }
+
     }
 }
 

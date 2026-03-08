@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.navigation.compose.rememberNavController
 import com.example.expense_tracking.ui.*
 import com.example.expense_tracking.R
 import com.example.expense_tracking.viewmodel.LoginViewModel
@@ -28,14 +29,31 @@ fun ExpenseTrackingApplication() {
 
 @Composable
 fun AppEntryPoint() {
-    val auth = FirebaseAuth.getInstance()
-    var isLoggedIn by remember { mutableStateOf(auth.currentUser != null) }
 
-    if (isLoggedIn) {
+    val auth = FirebaseAuth.getInstance()
+
+    var firebaseUser by remember {
+        mutableStateOf(auth.currentUser)
+    }
+
+    DisposableEffect(Unit) {
+
+        val listener = FirebaseAuth.AuthStateListener {
+            firebaseUser = it.currentUser
+        }
+
+        auth.addAuthStateListener(listener)
+
+        onDispose {
+            auth.removeAuthStateListener(listener)
+        }
+    }
+
+    if (firebaseUser != null) {
         MainScaffold()
     } else {
         LoginRegisterWrapper(
-            onLoginSuccess = { isLoggedIn = true }
+            onLoginSuccess = {}
         )
     }
 }
@@ -69,43 +87,6 @@ fun LoginRegisterWrapper(
         )
     }
 }
-
-
-
-@Composable
-fun AppRoot(
-    loginViewModel: LoginViewModel,
-    registerViewModel: RegisterViewModel
-    ) {
-    var showLogin by remember { mutableStateOf(true) }
-
-    var currentUserId by remember { mutableStateOf(FirebaseAuth.getInstance().currentUser?.uid) }
-
-    LaunchedEffect(loginViewModel.isLoggedIn) {
-        if (loginViewModel.isLoggedIn) {
-            currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        }
-    }
-
-    if (!loginViewModel.isLoggedIn) {
-        if (showLogin) {
-            LoginPage(
-                viewModel = loginViewModel,
-                onLoginSuccess = { loginViewModel.isLoggedIn = true },
-                onRegisterClick = { showLogin = false }
-            )
-        } else {
-            RegisterPage(
-                viewModel = registerViewModel,
-                onRegisterSuccess = { loginViewModel.isLoggedIn = true },
-                onLoginClick = { showLogin = true }
-            )
-        }
-    } else {
-        MainScaffold()
-    }
-}
-
 
 @Composable
 fun MainScaffold() {
@@ -171,7 +152,10 @@ fun MainScaffold() {
             }
             ExpenseTrackingScreen.Profile -> {
                 if (currentUserId != null) {
-                    ProfilePage(userId = currentUserId)
+                    ProfilePage(
+                        userId = currentUserId,
+                        navController = rememberNavController()
+                    )
                 } else {
                     Text("Loading user info...")
                 }

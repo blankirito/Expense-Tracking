@@ -6,6 +6,7 @@ import com.example.expense_tracking.data.UiState.ProfileUiState
 import com.example.expense_tracking.data.Repository.AccountRepository
 import com.example.expense_tracking.data.Repository.UserRepository
 import com.example.expense_tracking.data.model.Account
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,25 +69,6 @@ class ProfileViewModel(
         }
     }
 
-
-    fun changeEmail(password: String, newEmail: String) {
-        val userId = userIdGlobal ?: return
-        viewModelScope.launch {
-            try {
-                // 假设你已经验证 password 对应用户身份
-                val success = userRepository.updateEmail(userId, newEmail)
-                if (success) {
-                    _uiState.value = _uiState.value.copy(email = newEmail)
-                }
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
-            }
-        }
-    }
-
-
-
-
     fun changePassword(newPassword: String) {
         viewModelScope.launch {
             try {
@@ -123,16 +105,7 @@ class ProfileViewModel(
         }
     }
 
-
     fun logout() {
-        viewModelScope.launch {
-            try {
-                userRepository.logout()
-                _uiState.value = ProfileUiState()
-                _logoutEvent.value = true
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(error = e.message)
-            }
-        }
+        FirebaseAuth.getInstance().signOut()
     }
 }

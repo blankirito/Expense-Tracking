@@ -55,15 +55,27 @@ import com.example.expense_tracking.data.UiState.ProfileUiState
 import com.example.expense_tracking.ui.components.ChangePasswordDialog
 import com.example.expense_tracking.ui.components.EditProfileDialog
 import com.example.expense_tracking.viewmodel.ProfileViewModel
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 
 @Composable
 fun ProfilePage(
     modifier: Modifier = Modifier,
     userId: String,
+    navController: NavController,
     viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
 ) {
 
     val uistate by viewModel.uiState.collectAsState()
+    val logoutEvent by viewModel.logoutEvent.collectAsState()
+
+    LaunchedEffect(logoutEvent) {
+        if (logoutEvent) {
+            navController.navigate("login") {
+                popUpTo(0)
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.loadProfile(userId)
@@ -186,7 +198,9 @@ fun ProfilePage(
             Spacer(modifier = Modifier.padding(16.dp))
 
             Button(
-                onClick = { viewModel.logout() },
+                onClick = {
+                    viewModel.logout()
+                },
                 modifier = Modifier.align(Alignment.CenterHorizontally).fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0x80FFFFFF )
@@ -199,7 +213,6 @@ fun ProfilePage(
                     color = Color(0xFFD32F2F)
                 )
             }
-
             Spacer(modifier = Modifier.height(32.dp))
         }
 
@@ -613,9 +626,5 @@ fun Profilepage_Preferences(
 @Composable
 fun ProfilePreview() {
     ExpenseTrackingApplicationTheme {
-        ProfilePage(
-            userId = "user_id",
-            viewModel = viewModel()
-        )
     }
 }
