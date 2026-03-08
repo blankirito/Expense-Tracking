@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -23,8 +24,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.data.Constants.CategoryConstants
 import com.example.expense_tracking.data.model.Expense
+import com.example.expense_tracking.viewmodel.AddExpenseViewModel
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 
 @Composable
 fun AllTransactionPage(
@@ -36,7 +41,19 @@ fun AllTransactionPage(
     var selectedMonth by remember { mutableStateOf("All Month") }
     var selectedYear by remember { mutableStateOf("All Year") }
 
-    val categories = listOf("All Category") + CategoryConstants.CATEGORY_ICONS.keys.toList()
+    val viewModel: AddExpenseViewModel = viewModel()
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserCategories(
+            currentUserId,
+            FirebaseFirestore.getInstance()
+        )
+    }
+
+    val categories =
+        (listOf("All Category") + CategoryConstants.CATEGORIES).distinct()
+
     val monthMap = mapOf(
         "All Month" to "All Month",
         "01" to "Jan", "02" to "Feb", "03" to "Mar", "04" to "Apr",
