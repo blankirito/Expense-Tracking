@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.expense_tracking.R
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.viewmodel.BudgetViewModel
@@ -403,6 +404,12 @@ fun Budgetpage_CategoryBudgetItem(
 ) {
     var showDialog by remember { mutableStateOf(false) }
 
+    val alertColor = when {
+        percentage >= 90 -> Color.Red
+        percentage >= 70 -> Color(0xFFFF9800) // Orange
+        else -> Color(0xFF4CAF50) // Green
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White)
@@ -448,10 +455,23 @@ fun Budgetpage_CategoryBudgetItem(
                     )
             }
             Spacer(modifier = Modifier.padding(4.dp))
-            LinearProgressIndicator(progress = percentage / 100f, modifier = Modifier.fillMaxWidth(), color = Color.Black, trackColor = Color.LightGray)
+            LinearProgressIndicator(
+                progress = percentage / 100f,
+                modifier = Modifier.fillMaxWidth(),
+                color = alertColor,
+                trackColor = Color.LightGray
+            )
             Spacer(modifier = Modifier.padding(4.dp))
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "$percentage% used", fontSize = 12.sp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "$percentage% used",
+                    fontSize = 12.sp,
+                    color = alertColor,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = currency, fontSize = 12.sp)
                 Spacer(
@@ -459,6 +479,15 @@ fun Budgetpage_CategoryBudgetItem(
                 )
                 Text(text = remaining.toString(), fontSize = 12.sp)
                 Text(text = " left", fontSize = 12.sp)
+            }
+            if (percentage >= 100) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "⚠ Budget exceeded",
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

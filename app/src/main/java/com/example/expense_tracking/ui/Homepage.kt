@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -176,7 +177,7 @@ fun HomeMainContent(
         Spacer(modifier = Modifier.height(8.dp))
 
         Homepage_MonthlyTrends(
-            modifier = Modifier.fillMaxWidth().height(200.dp),
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
             viewModel = viewModel,
             allExpenses = viewModel.allExpenses.collectAsState().value
         )
@@ -189,7 +190,10 @@ fun HomeMainContent(
         )
         Spacer(modifier = Modifier.height(8.dp))
 
-        Homepage_SpendingPredictions(modifier = Modifier.fillMaxWidth().height(260.dp))
+        Homepage_SpendingPredictions(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
+            viewModel = viewModel
+        )
         Spacer(modifier = Modifier.height(8.dp))
 
         Homepage_RecentTransactions(
@@ -294,63 +298,113 @@ fun Homepage_MonthlyTrends(
     allExpenses: List<Expense>,
     modifier: Modifier = Modifier
 ) {
-    // 下拉筛选状态
+
     var selectedMonth by remember { mutableStateOf("All Month") }
     var selectedYear by remember { mutableStateOf("All Year") }
 
     val monthMap = mapOf(
         "All Month" to "All Month",
-        "01" to "Jan", "02" to "Feb", "03" to "Mar", "04" to "Apr",
-        "05" to "May", "06" to "Jun", "07" to "Jul", "08" to "Aug",
-        "09" to "Sep", "10" to "Oct", "11" to "Nov", "12" to "Dec"
+        "01" to "Jan","02" to "Feb","03" to "Mar","04" to "Apr",
+        "05" to "May","06" to "Jun","07" to "Jul","08" to "Aug",
+        "09" to "Sep","10" to "Oct","11" to "Nov","12" to "Dec"
     )
+
     val months = monthMap.keys.toList()
-    val years = listOf("All Year") + allExpenses.mapNotNull { it.date?.split("-")?.getOrNull(0) }.distinct()
+
+    val years = listOf("All Year") +
+            allExpenses.mapNotNull {
+                it.date?.split("-")?.getOrNull(0)
+            }.distinct()
+
+    val isMonthlyView = selectedMonth == "All Month"
+
+    // ---------------- FILTER ----------------
 
     val filteredExpenses = allExpenses.filter { expense ->
-        val expenseMonth = expense.date?.split("-")?.getOrNull(1)?.padStart(2,'0') ?: "01"
-        val expenseYear = expense.date?.split("-")?.getOrNull(0) ?: "2000"
 
-        (selectedMonth == "All Month" || expenseMonth == selectedMonth) &&
-                (selectedYear == "All Year" || expenseYear == selectedYear)
+        val parts = expense.date?.split("-") ?: return@filter false
+
+        val year = parts.getOrNull(0) ?: ""
+        val month = parts.getOrNull(1)?.padStart(2,'0') ?: ""
+
+        (selectedMonth == "All Month" || month == selectedMonth) &&
+                (selectedYear == "All Year" || year == selectedYear)
     }
+
+    // ---------------- DAILY TOTALS ----------------
 
     val dailyTotals = remember(filteredExpenses) {
-        val cal = Calendar.getInstance()
-        val daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH)
-        val totals = MutableList(daysInMonth) { 0.0 }
 
-        filteredExpenses.forEach { expense ->
-            expense.date?.split("-")?.getOrNull(2)?.toIntOrNull()?.let { day ->
-                if (day in 1..daysInMonth) totals[day - 1] += expense.price ?: 0.0
+        val totals = MutableList(31) { 0.0 }
+
+        filteredExpenses.forEach {
+
+            val day = it.date
+                ?.split("-")
+                ?.getOrNull(2)
+                ?.toIntOrNull()
+
+            if (day != null && day in 1..31) {
+                totals[day - 1] += it.price ?: 0.0
             }
         }
+
         totals
     }
+
+    // ---------------- MONTHLY TOTALS ----------------
+
+    val monthlyTotals = remember(filteredExpenses) {
+
+        val totals = MutableList(12) { 0.0 }
+
+        filteredExpenses.forEach {
+
+            val month = it.date
+                ?.split("-")
+                ?.getOrNull(1)
+                ?.toIntOrNull()
+
+            if (month != null && month in 1..12) {
+                totals[month - 1] += it.price ?: 0.0
+            }
+        }
+
+        totals
+    }
+
+    val chartData =
+        if (isMonthlyView) monthlyTotals
+        else dailyTotals
 
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
+
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
 
-            // 标题 + 筛选在同一行
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Title
+
                 Text(
-                    text = stringResource(R.string.monthlyTrend),
+                    text =
+                        if (isMonthlyView)
+                            "Monthly Spending Trend"
+                        else
+                            "Daily Spending Trend",
                     fontSize = 18.sp,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.Bold
                 )
 
-                // 筛选按钮
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    // Month Dropdown
+
                     var monthExpanded by remember { mutableStateOf(false) }
+
                     Surface(
                         modifier = Modifier
                             .clickable { monthExpanded = true }
@@ -359,13 +413,29 @@ fun Homepage_MonthlyTrends(
                         shape = RoundedCornerShape(12.dp),
                         color = Color(0xFFF5F5F5)
                     ) {
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(monthMap[selectedMonth] ?: selectedMonth, fontSize = 14.sp)
-                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+
+                            Text(
+                                monthMap[selectedMonth] ?: selectedMonth,
+                                fontSize = 14.sp
+                            )
+
+                            Icon(
+                                Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
-                    DropdownMenu(expanded = monthExpanded, onDismissRequest = { monthExpanded = false }) {
+
+                    DropdownMenu(
+                        expanded = monthExpanded,
+                        onDismissRequest = { monthExpanded = false }
+                    ) {
+
                         months.forEach { month ->
+
                             DropdownMenuItem(
                                 text = { Text(monthMap[month] ?: month) },
                                 onClick = {
@@ -376,8 +446,8 @@ fun Homepage_MonthlyTrends(
                         }
                     }
 
-                    // Year Dropdown
                     var yearExpanded by remember { mutableStateOf(false) }
+
                     Surface(
                         modifier = Modifier
                             .clickable { yearExpanded = true }
@@ -386,13 +456,26 @@ fun Homepage_MonthlyTrends(
                         shape = RoundedCornerShape(12.dp),
                         color = Color(0xFFF5F5F5)
                     ) {
+
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(selectedYear, fontSize = 14.sp) // 直接显示年份
-                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
+
+                            Text(selectedYear, fontSize = 14.sp)
+
+                            Icon(
+                                Icons.Default.KeyboardArrowDown,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
                         }
                     }
-                    DropdownMenu(expanded = yearExpanded, onDismissRequest = { yearExpanded = false }) {
+
+                    DropdownMenu(
+                        expanded = yearExpanded,
+                        onDismissRequest = { yearExpanded = false }
+                    ) {
+
                         years.forEach { year ->
+
                             DropdownMenuItem(
                                 text = { Text(year) },
                                 onClick = {
@@ -407,9 +490,9 @@ fun Homepage_MonthlyTrends(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Chart 保留在 Column 下方
             MonthlyTrendsChart(
-                expensesByDay = dailyTotals,
+                expenses = chartData,
+                isMonthly = isMonthlyView,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
@@ -420,47 +503,63 @@ fun Homepage_MonthlyTrends(
 
 @Composable
 fun MonthlyTrendsChart(
-    expensesByDay: List<Double>,
+    expenses: List<Double>,
+    isMonthly: Boolean,
     modifier: Modifier = Modifier
 ) {
-    if (expensesByDay.isEmpty()) {
+
+    if (expenses.isEmpty()) {
+
         Box(
             modifier = modifier,
             contentAlignment = Alignment.Center
         ) {
             Text("No data yet", color = Color.Gray)
         }
+
         return
     }
 
     Canvas(modifier = modifier.padding(8.dp)) {
+
         val canvasWidth = size.width
         val canvasHeight = size.height
-        val n = expensesByDay.size
-        if (n < 2) return@Canvas
 
-        val maxExpense = expensesByDay.maxOrNull() ?: 0.0
-        val minExpense = expensesByDay.minOrNull() ?: 0.0
+        val n = expenses.size
+        if (n == 2) return@Canvas
+
+        val maxExpense = expenses.maxOrNull() ?: 0.0
+        val minExpense = expenses.minOrNull() ?: 0.0
+
+        val range =
+            if (maxExpense - minExpense == 0.0) 1.0
+            else maxExpense - minExpense
 
         val leftPadding = 50f
         val bottomPadding = 40f
+
         val usableWidth = canvasWidth - leftPadding
         val usableHeight = canvasHeight - bottomPadding
+
         val spacingX = usableWidth / (n - 1)
 
-        val points = expensesByDay.mapIndexed { index, value ->
+        val points = expenses.mapIndexed { index, value ->
+
             val x = leftPadding + spacingX * index
-            val y = usableHeight - ((value - minExpense) / (maxExpense - minExpense)).toFloat() * usableHeight
+
+            val y =
+                usableHeight -
+                        ((value - minExpense) / range).toFloat() * usableHeight
+
             Offset(x, y)
         }
 
         val ySteps = 5
-        val gridPaint = android.graphics.Paint().apply {
-            color = android.graphics.Color.LTGRAY
-            strokeWidth = 1f
-        }
+
         for (i in 0..ySteps) {
+
             val yPos = usableHeight - i * (usableHeight / ySteps)
+
             drawLine(
                 color = Color.LightGray,
                 start = Offset(leftPadding, yPos),
@@ -470,6 +569,7 @@ fun MonthlyTrendsChart(
         }
 
         for (i in 0 until points.lastIndex) {
+
             drawLine(
                 color = Color(0xFF1565C0),
                 start = points[i],
@@ -478,39 +578,62 @@ fun MonthlyTrendsChart(
             )
         }
 
-        points.forEach { point ->
+        points.forEach {
+
             drawCircle(
                 color = Color(0xFF1565C0),
                 radius = 6f,
-                center = point
+                center = it
             )
         }
 
         val textPaint = android.graphics.Paint().apply {
+
             color = android.graphics.Color.BLACK
             textSize = 28f
             textAlign = android.graphics.Paint.Align.RIGHT
         }
+
         for (i in 0..ySteps) {
-            val yValue = minExpense + (maxExpense - minExpense) / ySteps * i
-            val yPos = usableHeight - i * (usableHeight / ySteps)
+
+            val yValue =
+                minExpense + (range / ySteps * i)
+
+            val yPos =
+                usableHeight - i * (usableHeight / ySteps)
+
             drawContext.canvas.nativeCanvas.drawText(
                 String.format("%.0f", yValue),
-                leftPadding - 10f, // 左边留空
+                leftPadding - 10f,
                 yPos + 8f,
                 textPaint
             )
         }
 
+        val monthLabels = listOf(
+            "Jan","Feb","Mar","Apr","May","Jun",
+            "Jul","Aug","Sep","Oct","Nov","Dec"
+        )
+
         val xTextPaint = android.graphics.Paint().apply {
+
             color = android.graphics.Color.BLACK
             textSize = 24f
             textAlign = android.graphics.Paint.Align.CENTER
         }
-        for (i in 0 until n step 2) {  // 每两天显示一次
+
+        val step = maxOf(1, n / 10)
+
+        for (i in 0 until n step step) {
+
             val xPos = leftPadding + spacingX * i
+
+            val label =
+                if (isMonthly) monthLabels[i]
+                else (i + 1).toString()
+
             drawContext.canvas.nativeCanvas.drawText(
-                (i + 1).toString(),
+                label,
                 xPos,
                 usableHeight + 30f,
                 xTextPaint
@@ -567,7 +690,8 @@ fun Homepage_ExpenseSummary(
                 Text(
                     text = stringResource(R.string.expenseSummary),
                     fontSize = 18.sp,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    fontWeight = FontWeight.Bold
                 )
 
                 // 筛选按钮
@@ -669,7 +793,22 @@ fun ExpenseSummary(
         Color(0xFF2196F3),
         Color(0xFF64B5F6),
         Color(0xFF90CAF9),
-        Color(0xFFBBDEFB)
+        Color(0xFFBBDEFB),
+
+        Color(0xFF2E7D32),
+        Color(0xFF43A047),
+        Color(0xFF66BB6A),
+
+        Color(0xFFF9A825),
+        Color(0xFFFFB300),
+
+        Color(0xFFE65100),
+        Color(0xFFFB8C00),
+
+        Color(0xFF6A1B9A),
+        Color(0xFF8E24AA),
+
+        Color(0xFF00897B)
     )
 
     val total = expensesByCategory.values.sum()
@@ -722,23 +861,207 @@ fun ExpenseSummary(
     }
 }
 
-
-
 @Composable
-fun Homepage_SpendingPredictions(modifier: Modifier = Modifier) {
+fun Homepage_SpendingPredictions(
+    viewModel: HomeViewModel,
+    modifier: Modifier = Modifier
+) {
+
+    val chartData by viewModel.predictionChartData.collectAsState()
+    val min by viewModel.predictionMin.collectAsState()
+    val max by viewModel.predictionMax.collectAsState()
+    val prediction by viewModel.predictedNextMonth.collectAsState()
+
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
             containerColor = Color.White
         )
     ) {
-        Spacer(
-            modifier = Modifier.padding(8.dp)
-        )
-        Text(
-            text = stringResource(R.string.spendingPrediction),
-            modifier = modifier.padding(start = 8.dp)
-        )
+
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+
+            Text(
+                text = "Spending Prediction",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            PredictionBarChart(
+                data = chartData,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Predicted next month spending",
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "RM ${prediction.toInt()}",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1565C0)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Based on your last 3 months spending trend",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Prediction range",
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "RM ${min.toInt()} — RM ${max.toInt()}",
+                color = Color.Gray
+            )
+        }
+    }
+}
+
+@Composable
+fun PredictionBarChart(
+    data: List<Pair<String, Double>>,
+    modifier: Modifier = Modifier
+) {
+
+    if (data.isEmpty()) return
+
+    val maxValue = data.maxOf { it.second }
+    val ySteps = 5
+
+    Canvas(modifier = modifier.padding(16.dp)) {
+
+        val canvasWidth = size.width
+        val canvasHeight = size.height
+
+        val leftPadding = 80f
+        val bottomPadding = 80f
+        val topPadding = 40f
+
+        val usableWidth = canvasWidth - leftPadding
+        val usableHeight = canvasHeight - bottomPadding - topPadding
+
+        val barWidth = usableWidth / (data.size * 2)
+        val spacing = barWidth
+
+        val textPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.BLACK
+            textSize = 32f
+            textAlign = android.graphics.Paint.Align.RIGHT
+        }
+
+        val xTextPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.BLACK
+            textSize = 30f
+            textAlign = android.graphics.Paint.Align.CENTER
+        }
+
+        val predictPaint = android.graphics.Paint().apply {
+            color = android.graphics.Color.RED
+            textSize = 28f
+            textAlign = android.graphics.Paint.Align.CENTER
+        }
+
+        // Y Axis grid
+        for (i in 0..ySteps) {
+
+            val yValue = maxValue / ySteps * i
+
+            val y =
+                canvasHeight - bottomPadding -
+                        (usableHeight / ySteps * i)
+
+            drawLine(
+                color = Color.LightGray,
+                start = Offset(leftPadding, y),
+                end = Offset(canvasWidth, y),
+                strokeWidth = 2f
+            )
+
+            drawContext.canvas.nativeCanvas.drawText(
+                yValue.toInt().toString(),
+                leftPadding - 20f,
+                y + 10f,
+                textPaint
+            )
+        }
+
+        data.forEachIndexed { index, item ->
+
+            val barHeight =
+                (item.second / maxValue * usableHeight).toFloat()
+
+            val x =
+                leftPadding + spacing +
+                        index * (barWidth + spacing)
+
+            val y =
+                canvasHeight - bottomPadding - barHeight
+
+            val isPrediction = index == data.lastIndex
+
+            drawRect(
+                color =
+                    if (isPrediction)
+                        Color(0xFFFF7043)
+                    else
+                        Color(0xFF1565C0),
+
+                topLeft = Offset(x, y),
+
+                size = androidx.compose.ui.geometry.Size(
+                    barWidth,
+                    barHeight
+                )
+            )
+
+            // X label
+            drawContext.canvas.nativeCanvas.drawText(
+                item.first,
+                x + barWidth / 2,
+                canvasHeight - 30f,
+                xTextPaint
+            )
+
+            // Prediction label
+            if (isPrediction) {
+
+                drawContext.canvas.nativeCanvas.drawText(
+                    "Predict",
+                    x + barWidth / 2,
+                    y - 20f,
+                    predictPaint
+                )
+
+                drawContext.canvas.nativeCanvas.drawText(
+                    item.second.toInt().toString(),
+                    x + barWidth / 2,
+                    y - 50f,
+                    predictPaint
+                )
+            }
+        }
     }
 }
 
@@ -756,7 +1079,9 @@ fun Homepage_RecentTransactions(
             Row(modifier = Modifier.fillMaxWidth()) {
                 Text(
                     text = stringResource(R.string.recentTransaction),
-                    modifier = modifier.weight(1f).padding(12.dp)
+                    modifier = modifier.weight(1f).padding(12.dp),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
                 )
                 TextButton(onClick = onViewAllClick) {
                     Text("View All")

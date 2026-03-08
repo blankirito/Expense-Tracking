@@ -109,4 +109,5 @@ class HomeRepository {
             .mapValues { (_, expenses) -> expenses.sumOf { it.price ?: 0.0 } }
     }
 
+
 }

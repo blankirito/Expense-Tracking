@@ -41,6 +41,21 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
     private val _allExpenses = MutableStateFlow<List<Expense>>(emptyList())
     val allExpenses: StateFlow<List<Expense>> = _allExpenses
 
+    private val _predictedNextMonth = MutableStateFlow(0.0)
+    val predictedNextMonth: StateFlow<Double> = _predictedNextMonth
+
+    private val _predictionChartData =
+        MutableStateFlow<List<Pair<String, Double>>>(emptyList())
+
+    val predictionChartData: StateFlow<List<Pair<String, Double>>> =
+        _predictionChartData
+
+    private val _predictionMin = MutableStateFlow(0.0)
+    val predictionMin: StateFlow<Double> = _predictionMin
+
+    private val _predictionMax = MutableStateFlow(0.0)
+    val predictionMax: StateFlow<Double> = _predictionMax
+
     private var currentUserId: String = ""
 
     fun loadUserData(userId: String) {
@@ -101,6 +116,8 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
 
                     // All Transactions 显示全部
                     _allExpenses.value = expenses.sortedByDescending { it.date }
+
+                    calculateSpendingPrediction()
                 }
             }
     }
@@ -126,12 +143,87 @@ class HomeViewModel(private val repository: HomeRepository = HomeRepository()) :
         }
     }
 
-
     fun loadMonthlyCategoryExpenses(userId: String) {
         viewModelScope.launch {
             _monthlyCategoryExpenses.value = repository.getUserThisMonthExpensesByCategory(userId)
         }
     }
 
+    fun calculateSpendingPrediction() {
+
+        val expenses = _allExpenses.value
+        if (expenses.isEmpty()) return
+
+        val monthlyTotals = mutableMapOf<String, Double>()
+
+        expenses.forEach { expense ->
+            val date = expense.date ?: return@forEach
+            val month = date.substring(0, 7)
+
+            monthlyTotals[month] =
+                (monthlyTotals[month] ?: 0.0) + (expense.price ?: 0.0)
+        }
+
+        val currentMonth = java.text.SimpleDateFormat(
+            "yyyy-MM",
+            java.util.Locale.US
+        ).format(java.util.Date())
+
+        val filteredMonths =
+            monthlyTotals.filterKeys { it != currentMonth }
+
+        val sortedMonths =
+            filteredMonths.keys.sorted()
+
+        val last3Months =
+            sortedMonths.takeLast(3)
+
+        val values = last3Months.mapIndexed { index, month ->
+            Pair(index + 1, filteredMonths[month] ?: 0.0)
+        }
+
+        if (values.size < 2) return
+
+        val n = values.size
+        val sumX = values.sumOf { it.first }
+        val sumY = values.sumOf { it.second }
+        val sumXY = values.sumOf { it.first * it.second }
+        val sumX2 = values.sumOf { it.first * it.first }
+
+        val denominator = (n * sumX2 - sumX * sumX)
+
+        val slope =
+            if (denominator.toDouble() == 0.0) 0.0
+            else (n * sumXY - sumX * sumY) / denominator
+
+        val intercept =
+            (sumY - slope * sumX) / n
+
+        val prediction =
+            intercept + slope * (n + 1)
+
+        // ⭐ 关键修复 (UI下面文字)
+        _predictedNextMonth.value = prediction
+
+        val chartData = mutableListOf<Pair<String, Double>>()
+
+        last3Months.forEach {
+            chartData.add(
+                Pair(
+                    it.substring(5),
+                    filteredMonths[it] ?: 0.0
+                )
+            )
+        }
+
+        chartData.add(Pair("Predict", prediction))
+
+        _predictionChartData.value = chartData
+
+        val errorMargin = prediction * 0.1
+
+        _predictionMin.value = prediction - errorMargin
+        _predictionMax.value = prediction + errorMargin
+    }
 
 }
