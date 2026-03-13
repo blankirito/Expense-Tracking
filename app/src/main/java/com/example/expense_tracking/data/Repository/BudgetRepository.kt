@@ -114,6 +114,17 @@ class BudgetRepository {
         }
     }
 
-
+    suspend fun getUserExpenses(userId: String): List<Expense> {
+        return try {
+            val snapshot = firestore.collection("expenses")
+                .whereEqualTo("user_id", userId)
+                .get()
+                .await()
+            snapshot.documents.mapNotNull { it.toObject(Expense::class.java) }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
+    }
 
 }

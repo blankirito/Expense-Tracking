@@ -26,16 +26,43 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
     private val _totalLimit = MutableStateFlow(0.0)
     val totalLimit: StateFlow<Double> = _totalLimit
 
-    private val _totalSpend = MutableStateFlow(0.0)
-    val totalSpend: StateFlow<Double> = _totalSpend
-
     private val _budgets = MutableStateFlow<List<Budget>>(emptyList())
     val budgets: StateFlow<List<Budget>> = _budgets
 
-    val categorySpends = _budgets.map { budgets ->
-        budgets.groupBy { it.category }
-            .mapValues { entry -> entry.value.sumOf { it.spend } }
+    private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
+
+    // 只计算本月每个类别支出
+    val categorySpends: StateFlow<Map<String, Double>> = _expenses.map { expenses ->
+        val calendar = java.util.Calendar.getInstance()
+        val currentYear = calendar.get(java.util.Calendar.YEAR)
+        val currentMonth = calendar.get(java.util.Calendar.MONTH) + 1
+
+        expenses
+            .filter { expense ->
+                val parts = expense.date.split("-")
+                val year = parts.getOrNull(0)?.toIntOrNull()
+                val month = parts.getOrNull(1)?.toIntOrNull()
+                year == currentYear && month == currentMonth
+            }
+            .groupBy { it.category }
+            .mapValues { entry -> entry.value.sumOf { it.price } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
+
+    // 只计算本月总支出
+    val totalMonthlySpend: StateFlow<Double> = _expenses.map { expenses ->
+        val calendar = java.util.Calendar.getInstance()
+        val currentYear = calendar.get(java.util.Calendar.YEAR)
+        val currentMonth = calendar.get(java.util.Calendar.MONTH) + 1
+
+        expenses
+            .filter { expense ->
+                val parts = expense.date.split("-")
+                val year = parts.getOrNull(0)?.toIntOrNull()
+                val month = parts.getOrNull(1)?.toIntOrNull()
+                year == currentYear && month == currentMonth
+            }
+            .sumOf { it.price }
+    }.stateIn(viewModelScope, SharingStarted.Lazily, 0.0)
 
     private var currentUserId: String = ""
 
@@ -47,8 +74,8 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             _currencies.value = repository.getUserAccountCurrency(userId)
             _currency.value = _currencies.value.firstOrNull() ?: "RM"
             _budgets.value = repository.getUserBudgets(userId)
-            _totalSpend.value = repository.getUserTotalMonthlyBudgetSpend(userId)
-            _totalLimit.value = repository.getUserTotalMonthlyBudgetLimit(userId)
+            _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
+            _expenses.value = repository.getUserExpenses(userId)
         }
     }
 
@@ -59,9 +86,7 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
                 else it
             }
             _budgets.value = updatedBudgets
-
             _totalLimit.value = updatedBudgets.sumOf { it.limit ?: 0.0 }
-
             updatedBudgets.find { it.category == newName }?.let { budget ->
                 repository.updateBudget(budget)
             }
@@ -71,17 +96,14 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
     fun addNewCategory(categoryName: String, limit: Double) {
         viewModelScope.launch {
             val newBudget = Budget(
-                id = java.util.UUID.randomUUID().toString() ,
+                id = java.util.UUID.randomUUID().toString(),
                 user_id = currentUserId,
                 category = categoryName,
                 limit = limit,
                 spend = 0.0
             )
-
             _budgets.value = _budgets.value + newBudget
-
             _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
-
             repository.addBudget(newBudget)
         }
     }
@@ -89,17 +111,11 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
     fun deleteCategory(category: String) {
         viewModelScope.launch {
             val budgetToDelete = _budgets.value.find { it.category == category }
-
             budgetToDelete?.let {
                 repository.deleteBudget(it)
             }
-
             _budgets.value = _budgets.value.filter { it.category != category }
-
             _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
         }
     }
-
-
-
 }

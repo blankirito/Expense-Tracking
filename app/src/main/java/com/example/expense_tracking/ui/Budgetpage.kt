@@ -64,10 +64,8 @@ fun BudgetPage(
 
     val accounts by viewModel.accounts.collectAsState()
     val currency by viewModel.currency.collectAsState()
-    val totalSpend by viewModel.totalSpend.collectAsState()
+    val totalSpend by viewModel.totalMonthlySpend.collectAsState()
     val totalLimit by viewModel.totalLimit.collectAsState()
-
-
 
     var selectedTab by remember { mutableStateOf("Budget") }
 
