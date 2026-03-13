@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.expense_tracking.data.Repository.BudgetRepository
 import com.example.expense_tracking.data.model.Account
 import com.example.expense_tracking.data.model.Budget
+import com.example.expense_tracking.data.model.Expense
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +45,7 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             val accounts = repository.getUserAccounts(userId)
             _accounts.value = accounts
             _currencies.value = repository.getUserAccountCurrency(userId)
-            _currency.value = _currencies.value.firstOrNull() ?: "MYR"
+            _currency.value = _currencies.value.firstOrNull() ?: "RM"
             _budgets.value = repository.getUserBudgets(userId)
             _totalSpend.value = repository.getUserTotalMonthlyBudgetSpend(userId)
             _totalLimit.value = repository.getUserTotalMonthlyBudgetLimit(userId)
@@ -98,6 +99,7 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
         }
     }
+
 
 
 }

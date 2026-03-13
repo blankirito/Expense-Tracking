@@ -23,7 +23,7 @@ class HomeViewModel(
     private val _accounts = MutableStateFlow<List<Account>>(emptyList())
     val accounts: StateFlow<List<Account>> = _accounts
 
-    private val _currency = MutableStateFlow("MYR")
+    private val _currency = MutableStateFlow("RM")
     val currency: StateFlow<String> = _currency
 
     private val _currencies = MutableStateFlow<List<String>>(emptyList())

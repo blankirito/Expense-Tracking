@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.expense_tracking.ExpenseTrackingApplicationTheme
 import com.example.expense_tracking.R
+import com.example.expense_tracking.data.UiState.ProfileUiState
 import com.example.expense_tracking.data.model.*
 import com.example.expense_tracking.ui.components.Editamountfield
 import com.example.expense_tracking.ui.components.Editdatefield
@@ -27,6 +28,7 @@ import com.example.expense_tracking.ui.components.Editdescriptionfield
 import com.example.expense_tracking.ui.components.*
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 import com.example.expense_tracking.viewmodel.BudgetViewModel
+import com.example.expense_tracking.viewmodel.ProfileViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Calendar
@@ -43,8 +45,12 @@ fun AddPage(
     val context = LocalContext.current
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
+    val profileViewModel: ProfileViewModel = viewModel()
+    val profileUiState by profileViewModel.uiState.collectAsState()
+
     LaunchedEffect(Unit) {
-        viewModel.loadUserCategories(currentUserId, FirebaseFirestore.getInstance())
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: return@LaunchedEffect
+        profileViewModel.loadProfile(currentUserId)
     }
 
     Scaffold(
@@ -141,6 +147,7 @@ fun AddPage(
 
             Addpage_ExpenseDetail(
                 viewModel = viewModel,
+                accounts = profileUiState.accounts,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -156,9 +163,19 @@ fun AddPage(
 @Composable
 fun Addpage_ExpenseDetail(
     viewModel: AddExpenseViewModel,
+    accounts: List<Account>,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    var selectedAccount by remember { mutableStateOf(accounts.firstOrNull()?.id ?: "") }
+
+    LaunchedEffect(accounts) {
+        if (accounts.isNotEmpty()) {
+            selectedAccount = accounts.first().id
+            viewModel.onAccountSelected(selectedAccount)
+        }
+    }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -183,13 +200,13 @@ fun Addpage_ExpenseDetail(
                 modifier = Modifier.height(12.dp)
             )
             WalletDropDown(
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = viewModel.selectedAccountId,
+                uistate = ProfileUiState(accounts = accounts),
+                selectedOption = selectedAccount,
                 onSelected = {
+                    selectedAccount = it
                     viewModel.onAccountSelected(it)
                 }
             )
-
             Spacer(
                 modifier = Modifier.height(16.dp)
             )

@@ -105,6 +105,7 @@ class ProfileViewModel(
         }
     }
 
+
     fun logout() {
         FirebaseAuth.getInstance().signOut()
     }

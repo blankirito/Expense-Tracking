@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import com.example.expense_tracking.R
 import java.util.Calendar
 import com.example.expense_tracking.data.Constants.*
+import com.example.expense_tracking.data.UiState.ProfileUiState
 import com.example.expense_tracking.data.model.Account
 import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 import com.example.expense_tracking.viewmodel.ScanViewModel
@@ -480,15 +481,21 @@ fun Editdescriptionfield(
 @Composable
 fun WalletDropDown(
     modifier: Modifier = Modifier,
+    uistate: ProfileUiState,
     selectedOption: String,
     onSelected: (String) -> Unit
 ) {
-    val options = listOf(
-        "account_cash_001" to "Cash",
-        "account_bank_001" to "Bank",
-        "account_ewallet_001" to "E-Wallet"
-    )
     var expanded by remember { mutableStateOf(false) }
+
+    // 动态生成 options
+    val options = uistate.accounts.map { account ->
+        account.id to when (account.type) {
+            "CASH" -> "Cash"
+            "BANK" -> "Bank"
+            "EWALLET" -> "E-Wallet"
+            else -> account.type
+        }
+    }
 
     val selectedName = options.find { it.first == selectedOption }?.second ?: ""
 
@@ -503,9 +510,7 @@ fun WalletDropDown(
             onValueChange = {},
             readOnly = true,
             label = { Text("Account") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded)
-            },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
             modifier = Modifier
                 .menuAnchor()
                 .fillMaxWidth()
