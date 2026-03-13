@@ -171,8 +171,8 @@ fun HomeMainContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Homepage_totalBalance(amount = totalBalance.toInt(), currency = currency, modifier = Modifier.weight(1f).height(85.dp))
-            Homepage_thisMonth(amount = thisMonthExpenses.toInt(), currency = currency, modifier = Modifier.weight(1f).height(85.dp))
+            Homepage_totalBalance(amount = totalBalance, currency = currency, modifier = Modifier.weight(1f).height(85.dp))
+            Homepage_thisMonth(amount = thisMonthExpenses, currency = currency, modifier = Modifier.weight(1f).height(85.dp))
         }
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -208,7 +208,7 @@ fun HomeMainContent(
 fun Homepage_totalBalance(
     modifier: Modifier = Modifier,
     currency: String,
-    amount: Int
+    amount: Double
 ) {
     Card(
         modifier = modifier,
@@ -242,7 +242,7 @@ fun Homepage_totalBalance(
                 )
                 Spacer(modifier = Modifier.padding(1.dp))
                 Text(
-                    text = amount.toString(),
+                    text = String.format("%.2f", amount),
                     fontSize = 24.sp
                 )
             }
@@ -254,7 +254,7 @@ fun Homepage_totalBalance(
 fun Homepage_thisMonth(
     modifier: Modifier = Modifier,
     currency: String,
-    amount: Int
+    amount: Double
 ) {
     Card(
         modifier = modifier,
@@ -285,7 +285,7 @@ fun Homepage_thisMonth(
                 Text(text = currency,
                     fontSize = 24.sp)
                 Spacer(modifier = Modifier.padding(1.dp))
-                Text(text = amount.toString(),
+                Text(text = String.format("%.2f", amount),
                     fontSize = 24.sp)
             }
         }
@@ -680,13 +680,11 @@ fun Homepage_ExpenseSummary(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
 
-            // 标题 + 筛选在同一行
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Title
                 Text(
                     text = stringResource(R.string.expenseSummary),
                     fontSize = 18.sp,
@@ -694,7 +692,6 @@ fun Homepage_ExpenseSummary(
                     fontWeight = FontWeight.Bold
                 )
 
-                // 筛选按钮
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     // Month Dropdown
                     var monthExpanded by remember { mutableStateOf(false) }
@@ -734,7 +731,7 @@ fun Homepage_ExpenseSummary(
                         color = Color(0xFFF5F5F5)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(selectedYear, fontSize = 14.sp) // 直接显示年份
+                            Text(selectedYear, fontSize = 14.sp)
                             Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
@@ -754,7 +751,6 @@ fun Homepage_ExpenseSummary(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // 饼图 / ExpenseSummary 保留在 Column 下方
             if (categoryExpenses.isEmpty()) {
                 Box(
                     modifier = Modifier

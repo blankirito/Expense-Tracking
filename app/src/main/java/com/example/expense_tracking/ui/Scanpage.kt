@@ -83,10 +83,10 @@ fun ScanPage(
                 recognizedText = visionText.text
                 receiptData = receipt
 
-                // 填充 ViewModel
+
                 viewModel.onAmountChange(receipt.amount)
                 viewModel.onDescriptionChange(receipt.reference)
-                // 转换日期格式，例如 "01 Mar 2026" -> "2026-03-01"
+
                 viewModel.onDateChange(parseDateToYMD(receipt.date))
             }
             .addOnFailureListener { e ->

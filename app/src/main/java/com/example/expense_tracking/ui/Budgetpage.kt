@@ -380,9 +380,6 @@ fun Budgetpage_CategoryBudgets(
                 currency = currency,
                 onEditCategory = { newCategory, newLimit ->
                     viewModel.updateCategory(category, newCategory, newLimit)
-                },
-                onDeleteCategory = { catToDelete ->
-                    viewModel.deleteCategory(catToDelete)
                 }
             )
             Spacer(modifier = Modifier.padding(8.dp))
@@ -399,8 +396,7 @@ fun Budgetpage_CategoryBudgetItem(
     remaining: Double,
     percentage: Int,
     currency: String,
-    onEditCategory: (String, Double) -> Unit,
-    onDeleteCategory: (String) -> Unit
+    onEditCategory: (String, Double) -> Unit
 ) {
     var showDialog by remember { mutableStateOf(false) }
 

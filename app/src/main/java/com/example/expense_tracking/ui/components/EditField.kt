@@ -247,11 +247,9 @@ fun EditCategoryField(
                         val iconResId = CategoryConstants.CATEGORY_ICONS[selectedIcon]
                             ?: CategoryConstants.CATEGORY_ICONS[CategoryConstants.OTHERS]!!
 
-                        // ⚡ 新增 category 插入到第一个
                         if (!CategoryConstants.CATEGORIES.contains(newCategoryName)) {
                             CategoryConstants.CATEGORIES.add(0, newCategoryName)
                             CategoryConstants.CATEGORY_ICONS[newCategoryName] = iconResId
-                            // ⚡ 用户自定义 category map
                             CategoryConstants.USER_CATEGORY_ICONS[newCategoryName] = selectedIcon
                         }
 

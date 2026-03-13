@@ -294,7 +294,6 @@ class HomeViewModel(
             SimpleDateFormat("yyyy-MM", Locale.US)
                 .format(Date())
 
-        // FIX 1: exclude current AND future months
         val filtered =
             monthlyTotals.filterKeys { it < currentMonth }
 
@@ -336,22 +335,12 @@ class HomeViewModel(
                 (n * sumXY - sumX * sumY) /
                         denominator
 
-        // -------- Trend Detection --------
-
-        _predictionTrend.value =
-            when {
-                slope > 50 -> "Increasing ↑"
-                slope < -50 -> "Decreasing ↓"
-                else -> "Stable →"
-            }
-
         val intercept =
             (sumY - slope * sumX) / n
 
         val prediction =
             intercept + slope * (n + 1)
 
-        // FIX 2: prevent negative prediction
         val safePrediction =
             if (prediction < 0) 0.0 else prediction
 
@@ -378,25 +367,6 @@ class HomeViewModel(
         _predictionMin.value = safePrediction - margin
         _predictionMax.value = safePrediction + margin
 
-        // -------- Confidence Score --------
-
-        // variance calculation
-        val avg = values.map { it.second }.average()
-
-        val variance =
-            values.sumOf { (it.second - avg) * (it.second - avg) } / values.size
-
-        val stdDev = kotlin.math.sqrt(variance)
-
-        // smaller variance = higher confidence
-        val confidence =
-            if (avg == 0.0) 50
-            else
-                ((1 - (stdDev / avg)) * 100)
-                    .toInt()
-                    .coerceIn(0, 100)
-
-        _predictionConfidence.value = confidence
     }
 
     // ---------------- CLEAR LISTENERS ----------------

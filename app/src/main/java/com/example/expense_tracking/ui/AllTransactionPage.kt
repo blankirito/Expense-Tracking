@@ -76,10 +76,8 @@ fun AllTransactionPage(
     )
     val months = monthMap.keys.toList()
 
-    // 获取所有年份（从数据里提取）
     val years = listOf("All Year") + allTransactionList.mapNotNull { it.date?.split("-")?.getOrNull(0) }.distinct()
 
-    // 过滤逻辑：Category + Month + Year
     val filteredTransactions = allTransactionList.filter { expense ->
         val matchesCategory = selectedCategory == "All Category" ||
                 expense.category?.trim()?.lowercase() == selectedCategory.trim().lowercase()
@@ -104,12 +102,10 @@ fun AllTransactionPage(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // 筛选栏
             Row(
                 modifier = Modifier.padding(8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Category 下拉
                 var categoryExpanded by remember { mutableStateOf(false) }
                 Box {
                     Surface(
@@ -142,7 +138,6 @@ fun AllTransactionPage(
                     }
                 }
 
-                // Month 下拉
                 var monthExpanded by remember { mutableStateOf(false) }
                 Box {
                     Surface(
@@ -174,7 +169,6 @@ fun AllTransactionPage(
                     }
                 }
 
-                // Year 下拉
                 var yearExpanded by remember { mutableStateOf(false) }
                 Box {
                     Surface(
@@ -186,7 +180,7 @@ fun AllTransactionPage(
                         color = Color(0xFFF5F5F5)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(selectedYear, fontSize = 14.sp) // 直接显示年份
+                            Text(selectedYear, fontSize = 14.sp)
                             Icon(Icons.Default.KeyboardArrowDown, contentDescription = null, modifier = Modifier.size(18.dp))
                         }
                     }
@@ -207,7 +201,6 @@ fun AllTransactionPage(
                 }
             }
 
-            // Transaction 列表
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
