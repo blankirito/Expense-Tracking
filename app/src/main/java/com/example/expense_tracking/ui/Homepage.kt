@@ -171,8 +171,8 @@ fun HomeMainContent(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Homepage_totalBalance(amount = totalBalance, currency = currency, modifier = Modifier.weight(1f).height(85.dp))
-            Homepage_thisMonth(amount = thisMonthExpenses, currency = currency, modifier = Modifier.weight(1f).height(85.dp))
+            Homepage_totalBalance(amount = totalBalance, currency = currency, modifier = Modifier.weight(1f).wrapContentHeight())
+            Homepage_thisMonth(amount = thisMonthExpenses, currency = currency, modifier = Modifier.weight(1f).wrapContentHeight())
         }
         Spacer(modifier = Modifier.height(8.dp))
 

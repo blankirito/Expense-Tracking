@@ -192,8 +192,8 @@ fun BudgetPage(
                 modifier = Modifier.padding(8.dp)
             )
             Budgetpage_TotalMonthlyBudget(
-                total_cost = totalSpend.toInt(),
-                TotalBudget = totalLimit.toInt(),
+                total_cost = totalSpend,
+                TotalBudget = totalLimit,
                 currency = currency
             )
             Spacer(
@@ -274,13 +274,14 @@ fun BudgetPage(
     }
 }
 
-@Composable fun Budgetpage_TotalMonthlyBudget(
+@Composable
+fun Budgetpage_TotalMonthlyBudget(
     modifier: Modifier = Modifier,
-    total_cost: Int,
+    total_cost: Double,
     currency: String,
-    TotalBudget: Int
+    TotalBudget: Double
 ){
-    val percentage = if (TotalBudget > 0) (total_cost * 100) / TotalBudget else 0
+    val percentage: Double = if (TotalBudget > 0) (total_cost / TotalBudget) * 100 else 0.0
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors( containerColor = Color(0xFF1565C0),
@@ -316,7 +317,7 @@ fun BudgetPage(
                         )
                         Spacer(modifier = Modifier.padding(1.dp))
                         Text(
-                            text = total_cost.toString(),
+                            text = String.format("%.2f", total_cost),
                             fontSize = 24.sp
                         )
                     }
@@ -325,7 +326,7 @@ fun BudgetPage(
                         Row {
                             Text(text = currency, fontSize = 14.sp)
                             Spacer(modifier = Modifier.padding(1.dp))
-                            Text(text = TotalBudget.toString(), fontSize = 14.sp)
+                            Text(text = String.format("%.2f", TotalBudget), fontSize = 14.sp)
                         }
                     }
                 }
@@ -333,16 +334,17 @@ fun BudgetPage(
                     horizontalAlignment = Alignment.End
                 ) {
                     Row {
-                        Text(text = percentage.toString(), fontSize = 20.sp)
+                        Text(text = percentage.toInt().toString(), fontSize = 20.sp)
                         Text(text = "%", fontSize = 20.sp)
                     }
                     Text(text = "used", fontSize = 14.sp) }
             }
             Spacer( modifier = Modifier.padding(4.dp) )
             LinearProgressIndicator(
-                progress = percentage / 100f,
-                modifier = Modifier .fillMaxWidth(),
-                color = Color.Black, trackColor = Color.LightGray
+                progress = (percentage / 100f).toFloat(),
+                modifier = Modifier.fillMaxWidth(),
+                color = Color.Black,
+                trackColor = Color.LightGray
             )
             Spacer( modifier = Modifier.padding(4.dp) )
         }
@@ -363,7 +365,7 @@ fun Budgetpage_CategoryBudgets(
         val limit = budgets.find { it.category == category }?.limit ?: 0.0
         val percentage = if (limit > 0) (spend * 100 / limit).toInt() else 0
         Triple(category, spend, limit) to percentage
-    }.sortedByDescending { it.second } // 根据 percentage 排序
+    }.sortedByDescending { it.second }
 
     Column(modifier = modifier) {
         sortedCategories.forEach { (data, _) ->
@@ -434,8 +436,7 @@ fun Budgetpage_CategoryBudgetItem(
                 Spacer(
                     modifier = Modifier.padding(1.dp)
                 )
-                Text(text = spend.toString(),
-                    fontSize = 14.sp)
+                Text(text = String.format("%.2f", spend), fontSize = 14.sp)
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(text = "/")
                 Spacer(modifier = Modifier.padding(2.dp))
@@ -445,7 +446,7 @@ fun Budgetpage_CategoryBudgetItem(
                 Spacer(
                     modifier = Modifier.padding(1.dp)
                 )
-                Text(text = limit.toString(),
+                Text(text = String.format("%.2f", limit),
                     fontSize = 14.sp,
                     color = Color(0xFF424242)
                     )
@@ -473,7 +474,7 @@ fun Budgetpage_CategoryBudgetItem(
                 Spacer(
                     modifier = Modifier.padding(1.dp)
                 )
-                Text(text = remaining.toString(), fontSize = 12.sp)
+                Text(text =  String.format("%.2f", remaining), fontSize = 12.sp)
                 Text(text = " left", fontSize = 12.sp)
             }
             if (percentage >= 100) {
