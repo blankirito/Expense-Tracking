@@ -1155,13 +1155,13 @@ fun Homepage_RecentTransaction_Record(
             modifier = Modifier.padding(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
+            /*Icon(
                 painter = painterResource(id = iconRes),
                 contentDescription = category ?: "Others",
                 tint = iconColor,
                 modifier = Modifier.size(28.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(8.dp))*/
             Column {
                 Text(text = description)
                 Text(text = date, color = Color.Gray)

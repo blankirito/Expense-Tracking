@@ -97,19 +97,15 @@ class HomeViewModel(
 
         viewModelScope.launch {
 
-            // 1️⃣ 加载用户自定义类别
             loadUserCategories(userId)
 
-            // 2️⃣ 获取账户信息
             val accounts = repository.getUserAccounts(userId)
             _accounts.value = accounts
             _totalBalance.value = accounts.sumOf { it.current_balance ?: 0.0 }
 
-            // 3️⃣ 获取账户货币
             _currencies.value = repository.getUserAccountCurrency(userId)
             _currency.value = _currencies.value.firstOrNull() ?: "MYR"
 
-            // 4️⃣ 首次 fetch 数据，保证 UI 立即有内容
             val recent = repository.getUserRecentExpensesForAllAccounts(userId)
             _recentExpenses.value = recent
 

@@ -31,6 +31,7 @@ import com.example.expense_tracking.viewmodel.AddExpenseViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.text.font.FontWeight.Companion.Bold
 
 @Composable
 fun AllTransactionPage(
@@ -284,7 +285,12 @@ fun TransactionCard(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = description)
+                Text(
+                    text = description
+                )
+                Spacer(
+                    modifier = Modifier.height(4.dp)
+                )
                 Text(text = date, color = Color.Gray)
             }
             Spacer(modifier = Modifier.weight(1f))
