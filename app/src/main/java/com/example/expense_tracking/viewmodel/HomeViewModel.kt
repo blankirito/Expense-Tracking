@@ -2,6 +2,7 @@ package com.example.expense_tracking.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.expense_tracking.data.Constants.CategoryConstants
 import com.example.expense_tracking.data.Repository.HomeRepository
 import com.example.expense_tracking.data.model.Account
 import com.example.expense_tracking.data.model.Expense
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -95,27 +97,54 @@ class HomeViewModel(
 
         viewModelScope.launch {
 
+            // 1️⃣ 加载用户自定义类别
+            loadUserCategories(userId)
+
+            // 2️⃣ 获取账户信息
             val accounts = repository.getUserAccounts(userId)
-
             _accounts.value = accounts
+            _totalBalance.value = accounts.sumOf { it.current_balance ?: 0.0 }
 
-            _totalBalance.value =
-                accounts.sumOf { it.current_balance ?: 0.0 }
+            // 3️⃣ 获取账户货币
+            _currencies.value = repository.getUserAccountCurrency(userId)
+            _currency.value = _currencies.value.firstOrNull() ?: "MYR"
 
-            _currencies.value =
-                repository.getUserAccountCurrency(userId)
+            // 4️⃣ 首次 fetch 数据，保证 UI 立即有内容
+            val recent = repository.getUserRecentExpensesForAllAccounts(userId)
+            _recentExpenses.value = recent
 
-            _currency.value =
-                _currencies.value.firstOrNull() ?: "MYR"
+            val all = repository.getUserThisMonthExpensesForAllAccountsDetailed(userId)
+            _allExpenses.value = all
+
+            _thisMonthExpenses.value = all.sumOf { it.price ?: 0.0 }
 
             loadDailyExpenses(userId)
-
             loadMonthlyCategoryExpenses(userId)
         }
 
+        // 5️⃣ 保留 listener 更新
         listenAccountChanges(userId)
-
         listenExpenseChanges(userId)
+    }
+
+    private suspend fun loadUserCategories(userId: String) {
+
+        val snapshot = firestore.collection("categories")
+            .whereEqualTo("userId", userId)
+            .get()
+            .await()
+
+        snapshot.documents.forEach {
+
+            val name = it.getString("name") ?: return@forEach
+            val icon = it.getString("icon") ?: return@forEach
+
+            if (!CategoryConstants.CATEGORIES.contains(name)) {
+                CategoryConstants.CATEGORIES.add(name)
+            }
+
+            CategoryConstants.USER_CATEGORY_ICONS[name] = icon
+        }
     }
 
     // ---------------- RESET ----------------
