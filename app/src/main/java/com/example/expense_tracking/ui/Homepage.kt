@@ -871,7 +871,7 @@ fun ExpenseSummary(
                 )
 
                 // Amount
-                Text("$currency ${entry.value}")
+                Text("$currency ${"%.2f".format(entry.value)}")
             }
         }
     }
@@ -1170,7 +1170,7 @@ fun Homepage_RecentTransaction_Record(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(text = currency)
                 Spacer(modifier = Modifier.width(2.dp))
-                Text(text = total_cost.toString())
+                Text(text = "%.2f".format(total_cost))
             }
         }
     }

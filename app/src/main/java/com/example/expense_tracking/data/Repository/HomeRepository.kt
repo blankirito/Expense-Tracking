@@ -109,5 +109,15 @@ class HomeRepository {
             .mapValues { (_, expenses) -> expenses.sumOf { it.price ?: 0.0 } }
     }
 
+    suspend fun getUserAllExpenses(userId: String): List<Expense> {
+        val snapshot = FirebaseFirestore.getInstance()
+            .collection("expenses")
+            .whereEqualTo("user_id", userId)
+            .get()
+            .await()
 
+        return snapshot.documents.mapNotNull {
+            it.toObject(Expense::class.java)
+        }
+    }
 }

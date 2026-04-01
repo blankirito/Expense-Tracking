@@ -31,7 +31,6 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
 
     private val _expenses = MutableStateFlow<List<Expense>>(emptyList())
 
-    // 只计算本月每个类别支出
     val categorySpends: StateFlow<Map<String, Double>> = _expenses.map { expenses ->
         val calendar = java.util.Calendar.getInstance()
         val currentYear = calendar.get(java.util.Calendar.YEAR)
@@ -48,7 +47,6 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             .mapValues { entry -> entry.value.sumOf { it.price } }
     }.stateIn(viewModelScope, SharingStarted.Lazily, emptyMap())
 
-    // 只计算本月总支出
     val totalMonthlySpend: StateFlow<Double> = _expenses.map { expenses ->
         val calendar = java.util.Calendar.getInstance()
         val currentYear = calendar.get(java.util.Calendar.YEAR)
@@ -76,6 +74,7 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             _budgets.value = repository.getUserBudgets(userId)
             _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
             _expenses.value = repository.getUserExpenses(userId)
+            resetMonthlySpendsIfNeeded()
         }
     }
 
@@ -116,6 +115,18 @@ class BudgetViewModel(private val repository: BudgetRepository = BudgetRepositor
             }
             _budgets.value = _budgets.value.filter { it.category != category }
             _totalLimit.value = _budgets.value.sumOf { it.limit ?: 0.0 }
+        }
+    }
+
+    fun resetMonthlySpendsIfNeeded() {
+        val calendar = java.util.Calendar.getInstance()
+        val today = calendar.get(java.util.Calendar.DAY_OF_MONTH)
+        if (today == 1) {
+            viewModelScope.launch {
+                val updatedBudgets = _budgets.value.map { it.copy(spend = 0.0) }
+                _budgets.value = updatedBudgets
+                updatedBudgets.forEach { repository.updateBudget(it) }
+            }
         }
     }
 }

@@ -109,16 +109,18 @@ class HomeViewModel(
             val recent = repository.getUserRecentExpensesForAllAccounts(userId)
             _recentExpenses.value = recent
 
-            val all = repository.getUserThisMonthExpensesForAllAccountsDetailed(userId)
-            _allExpenses.value = all
+            val all = repository.getUserAllExpenses(userId)
 
-            _thisMonthExpenses.value = all.sumOf { it.price ?: 0.0 }
+            val sorted = all.sortedByDescending { it.date }
+
+            _allExpenses.value = sorted
+
+            calculateThisMonthExpenses(all)
 
             loadDailyExpenses(userId)
             loadMonthlyCategoryExpenses(userId)
         }
 
-        // 5️⃣ 保留 listener 更新
         listenAccountChanges(userId)
         listenExpenseChanges(userId)
     }
