@@ -454,9 +454,9 @@ fun Profilepage_WalletDetail(
     }
 
     if (showEditBudgetDialog) {
-        var cashText by remember { mutableStateOf(uistate.cash.toString()) }
-        var bankText by remember { mutableStateOf(uistate.bank.toString()) }
-        var ewalletText by remember { mutableStateOf(uistate.ewallet.toString()) }
+        var cashText by remember { mutableStateOf("%.2f".format(uistate.cash)) }
+        var bankText by remember { mutableStateOf("%.2f".format(uistate.bank)) }
+        var ewalletText by remember { mutableStateOf("%.2f".format(uistate.ewallet)) }
 
         val moneyRegex = Regex("""^\d*\.?\d{0,2}$""")
 

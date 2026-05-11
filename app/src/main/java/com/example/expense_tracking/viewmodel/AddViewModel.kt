@@ -97,4 +97,14 @@ class AddExpenseViewModel(
                 _userCategories.value = userList
             }
     }
+
+    // Inside AddExpenseViewModel.kt
+
+    fun resetForm() {
+        amount = ""
+        category = CategoryConstants.CATEGORIES.first()
+        description = ""
+        date = "" // or set to current date if you have a default
+        selectedAccountId = ""
+    }
 }

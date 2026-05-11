@@ -277,6 +277,7 @@ fun Addpage_ExpenseDetail(
                                 userId = currentUserId,
                                 onSuccess = {
                                     Toast.makeText(context, "Expense saved successfully", Toast.LENGTH_SHORT).show()
+                                    viewModel.resetForm()
                                     BudgetViewModel().loadUserData(currentUserId)
                                 },
                                 onError = { e ->
