@@ -11,6 +11,7 @@ import com.example.expense_tracking.data.Constants.*
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.round // Import added for rounding
 
 class AddExpenseViewModel(
     private val repository: AddRepository = AddRepository()
@@ -45,14 +46,21 @@ class AddExpenseViewModel(
         viewModelScope.launch {
             try {
                 if (selectedAccountId.isBlank()) return@launch
-                val expenseAmount = amount.toDoubleOrNull() ?: return@launch
+
+                // 1. Convert string to double
+                val rawAmount = amount.toDoubleOrNull() ?: return@launch
+
+                // 2. SAFETY CHECK: Round to exactly 2 decimal places
+                // Example: 10.5555 -> 10.56
+                val roundedAmount = round(rawAmount * 100) / 100.0
+
                 val account = repository.getAccount(selectedAccountId)
 
                 val expense = repository.createExpense(
                     userId = userId,
                     accountId = selectedAccountId,
                     category = category,
-                    price = expenseAmount,
+                    price = roundedAmount, // Use the rounded amount here
                     date = date,
                     description = description,
                     paymentMethod = account.name
@@ -70,22 +78,16 @@ class AddExpenseViewModel(
         userId: String,
         firestore: FirebaseFirestore
     ) {
-
         firestore.collection("categories")
             .whereEqualTo("userId", userId)
             .get()
             .addOnSuccessListener { snapshot ->
-
                 val userList = mutableListOf<String>()
-
                 for (doc in snapshot.documents) {
-
                     val name = doc.getString("name") ?: continue
-                    val iconKey =
-                        doc.getString("icon") ?: CategoryConstants.OTHERS
+                    val iconKey = doc.getString("icon") ?: CategoryConstants.OTHERS
 
                     userList.add(name)
-
                     CategoryConstants.USER_CATEGORY_ICONS[name] = iconKey
 
                     if (!CategoryConstants.CATEGORIES.contains(name)) {

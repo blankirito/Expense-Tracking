@@ -214,9 +214,17 @@ fun Addpage_ExpenseDetail(
                 text = stringResource(R.string.amount),
                 fontWeight = Bold
             )
+
+            val moneyRegex = remember { Regex("""^\d*\.?\d{0,2}$""") }
+
             Editamountfield(
                 value = viewModel.amount,
-                onValueChange = { viewModel.onAmountChange(it) },
+                onValueChange = { newValue ->
+                    // Only update the ViewModel if the new input matches the currency format
+                    if (newValue.matches(moneyRegex)) {
+                        viewModel.onAmountChange(newValue)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(

@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 class ProfileViewModel(
     private val userRepository: UserRepository = UserRepository(),
@@ -86,18 +87,23 @@ class ProfileViewModel(
     fun updateBudget(cash: Double, bank: Double, ewallet: Double) {
         val userId = uiState.value.userId ?: return
 
+        // Round to 2 decimal places before saving
+        val roundedCash = round(cash * 100) / 100.0
+        val roundedBank = round(bank * 100) / 100.0
+        val roundedEwallet = round(ewallet * 100) / 100.0
+
         viewModelScope.launch {
             val success = accountRepository.updateUserAccounts(
                 userId,
-                cash = cash,
-                bank = bank,
-                ewallet = ewallet
+                cash = roundedCash,
+                bank = roundedBank,
+                ewallet = roundedEwallet
             )
             if (success) {
                 _uiState.value = _uiState.value.copy(
-                    cash = cash,
-                    bank = bank,
-                    ewallet = ewallet
+                    cash = roundedCash,
+                    bank = roundedBank,
+                    ewallet = roundedEwallet
                 )
             } else {
                 _uiState.value = _uiState.value.copy(error = "Failed to save budget")

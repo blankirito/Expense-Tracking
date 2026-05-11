@@ -144,7 +144,7 @@ fun Editamountfield(
             } else {}
         },
         label = { Text(stringResource(R.string.example_amount)) },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
     )
 }
 

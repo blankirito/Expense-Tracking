@@ -392,7 +392,7 @@ fun Profilepage_WalletDetail(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = uistate.cash.toString())
+                    Text(text = "%.2f".format(uistate.cash))
                 }
             }
             Spacer(
@@ -411,7 +411,7 @@ fun Profilepage_WalletDetail(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = uistate.bank.toString())
+                    Text(text = "%.2f".format(uistate.bank))
                 }
             }
             Spacer(
@@ -430,7 +430,7 @@ fun Profilepage_WalletDetail(
                         .padding(10.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(text = uistate.ewallet.toString())
+                    Text(text = "%.2f".format(uistate.ewallet))
                 }
             }
 
@@ -458,6 +458,8 @@ fun Profilepage_WalletDetail(
         var bankText by remember { mutableStateOf(uistate.bank.toString()) }
         var ewalletText by remember { mutableStateOf(uistate.ewallet.toString()) }
 
+        val moneyRegex = Regex("""^\d*\.?\d{0,2}$""")
+
         AlertDialog(
             onDismissRequest = { showEditBudgetDialog = false },
             title = { Text(text = "Edit Budget") },
@@ -465,21 +467,24 @@ fun Profilepage_WalletDetail(
                 Column {
                     OutlinedTextField(
                         value = cashText,
-                        onValueChange = { cashText = it },
+                        onValueChange = { if (it.matches(moneyRegex)) cashText = it },
                         label = { Text("Cash") },
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                     OutlinedTextField(
                         value = bankText,
-                        onValueChange = { bankText = it },
+                        onValueChange = { if (it.matches(moneyRegex)) bankText = it },
                         label = { Text("Bank") },
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                     OutlinedTextField(
                         value = ewalletText,
-                        onValueChange = { ewalletText = it },
+                        onValueChange = { if (it.matches(moneyRegex)) ewalletText = it },
                         label = { Text("Ewallet") },
-                        singleLine = true
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                     )
                 }
             },
